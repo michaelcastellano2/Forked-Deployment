@@ -1,0 +1,11 @@
+{% extends 'collabrate/base.html' %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+{% block content %}
+<section class="landing">
+    <h1>Collaboration and accountability made easy.</h1>
+    <button><a href="{% url 'login' %}">Get Started</a></button>
+    <img class="landing-img" src="{% static 'collabrate/images/collab.png' %}">
+</section>
+{% endblock %}

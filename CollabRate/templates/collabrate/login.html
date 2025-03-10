@@ -1,0 +1,18 @@
+{% extends 'collabrate/base.html' %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+{% block content %}
+<div class="login-container">
+    <div class="left-panel">
+        <img class="login-img" src="{% static 'collabrate/images/eval.png' %}">
+    </div>
+    <div class="right-panel">
+        <h1>Your team evaluation solutions are <strong>one click</strong> away!</h1>
+        <button class="google-login">Sign in with Google<img class="google-g" src="{% static 'collabrate/images/google.png' %}">
+        </button>
+        <h2>Don't have an account?</h2>
+        <h3><a href="{% url 'register' %}">Register for an account</a></h3>
+    </div>
+</div>
+{% endblock %}

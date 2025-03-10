@@ -1,0 +1,164 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+}
+
+a {
+    text-decoration: none;  
+    color: inherit;       
+}
+
+a:hover, a:focus, a:active {
+    text-decoration: none; 
+    color: inherit;        
+}
+
+/* Navbar */
+
+.navbar {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    background-color: #212121;
+    margin: 0;
+    padding: 15px 20px;
+    color: #F2F0EF;
+}
+
+.navbar-left .logo {
+    font-size: 20px;
+    color: #F2F0EF;
+    text-decoration: none;
+}
+
+.navbar-right .login-btn {
+    background-color: #F2F0EF;
+    color: #212121;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.color-bar {
+    display: flex;
+    width: 100%;   
+    height: 5px;  
+    margin-top: 5px;  
+}
+
+.color-bar div {
+    flex: 1;  
+    height: 100%;
+}
+
+.color-bar .color1 { background-color: #872729; } 
+.color-bar .color2 { background-color: #C44B4B; } 
+.color-bar .color3 { background-color: #F2F0EF; } 
+.color-bar .color4 { background-color: #3D5A80; } 
+.color-bar .color5 { background-color: #293241; } 
+
+/* Landing */
+
+.landing {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;   
+    padding-top: 32px;
+}
+
+.landing h1 {
+    font-size: 32px;
+    font-weight: 400;
+}
+
+.landing button {
+    background-color: #3D5A80;
+    color: #F2F0EF;
+    border: none;
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 25px;
+}
+
+.landing button:hover{
+    background-color: #293241;
+}
+
+.login-container {
+    display: flex;
+    height: 100vh;  
+}
+
+.landing-img {
+    width: 50%;
+}
+
+/* Login + Register page */
+
+.left-panel {
+    background-color: #F2F0EF;
+    flex: 1; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.right-panel {
+    background-color: #3D5A80; 
+    flex: 1; 
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 120px 20px;
+}
+
+.right-panel h1{
+    color: #F2F0EF;
+    font-weight: 400;
+    text-align: center;
+}
+
+.right-panel h2{
+    color: #F2F0EF;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 10px;
+}
+
+.right-panel h3{
+    color: #73B6D2;
+    font-size: 20px;
+    font-weight: 300;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    padding: 0;
+    margin: 0;
+}
+
+.google-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F2F0EF;
+    color: #212121;
+    border: none;
+    padding: 10px 15px;
+    font-size: 20px;
+    font-weight: 400;
+    border-radius: 32px;
+    width: 50%;
+    height: 20%;
+}
+
+.google-g {
+    width: 15%;
+    margin-left: 6px;
+}
+
+.login-img {
+    width: 100%;
+}
