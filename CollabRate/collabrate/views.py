@@ -6,6 +6,3 @@ def index(request):
 
 def login(request):
     return render(request, "collabrate/login.html")
-
-def register(request):
-    return render(request, "collabrate/register.html")
