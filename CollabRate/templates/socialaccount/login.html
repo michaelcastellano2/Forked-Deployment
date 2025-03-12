@@ -1,0 +1,27 @@
+{% extends 'collabrate/base.html' %}
+{% load static %}
+{% load socialaccount static %}
+
+{% block title %}About Us{% endblock %}
+{% block content %}
+<div class="container login-container">
+    <div class="row">
+        <div class="col-md-6">
+            <img class="img-fluid login-img" src="{% static 'collabrate/images/eval.png' %}" alt="Evaluation Image">
+        </div>
+        <div class="col-md-6 d-flex flex-column justify-content-center align-items-center">
+            <h1 class="mb-4 text-center">
+                Your team evaluation solutions are <strong>one click</strong> away!
+            </h1>
+            <form method="post" action="" class="w-100 text-center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <img src="{% static 'collabrate/images/google.png' %}" alt="Google logo" class="me-2"
+                        style="height: 24px;">
+                    Sign in / Register with Google
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
