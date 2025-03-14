@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     'accounts.apps.AccountsConfig',
     'collabrate.apps.CollabrateConfig',
+    'dashboard'
 ]
 
 SITE_ID = 1
