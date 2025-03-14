@@ -6,7 +6,7 @@
  
  
     <div class="p-3 d-flex justify-content-between align-items-center w-100"
-         style="background-color: #ff6b6b; color: white; border-radius: 0 0 16px 16px; min-height: 100px; max-width: 100%;">
+        style="background-color: {{ course.color|default:'#4CAF50' }}; color: white; border-radius: 0 0 16px 16px; min-height: 100px; width: 100%;">
         <span><i class="fas fa-users"></i> {{ course.student_count }}</span>
         <span>{{ course.semester }} {{ course.year }}</span>
     </div>
