@@ -10,6 +10,12 @@
         </div>
     </div>
     <div class="navbar-right">
-        <button class="login-btn"><a href="{% url 'login' %}"><i class="fas fa-sign-in"></i> Login</a></button>
+        {% if user.is_authenticated %}
+        <!-- If the user is logged in -->
+            <button class="login-btn"><a href="{% url 'account_logout' %}"><i class="fas fa-sign-out"></i> Logout</a></button>
+        {% else %}
+        <!-- If the user is logged out -->
+            <button class="login-btn"><a href="{% url 'account_login' %}"><i class="fas fa-sign-in"></i> Login</a></button>
+        {% endif %}
     </div>
 </nav>

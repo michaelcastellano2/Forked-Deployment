@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     'accounts.apps.AccountsConfig',
     'collabrate.apps.CollabrateConfig',
+    'dashboard'
 ]
 
 SITE_ID = 1
@@ -123,10 +124,12 @@ AUTHENTICATION_BACKENDS = (
 ACCOUNT_LOGIN_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+SOCIALACCOUNT_LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 SOCIALACCOUNT_AUTO_SIGNUP = False
-
+LOGIN_URL = '/accounts/google/login/'
+#ACCOUNT_LOGOUT_ON_GET = True  #this line skips over the confirmation page 
 
 # Google provider configuration
 SOCIALACCOUNT_PROVIDERS = {
