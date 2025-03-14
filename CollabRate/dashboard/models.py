@@ -19,7 +19,7 @@ class Course(models.Model):
     student_count = models.IntegerField(default=0)
     semester = models.CharField(max_length=10, choices=SEMESTER_CHOICES)
     year = models.IntegerField()
-    color = models.CharField(max_length=7, blank=True, null=True)  # Allow blank colors
+    color = models.CharField(max_length=7, blank=True, null=True)  
 
     def save(self, *args, **kwargs):
         if not self.color:  # If no color is set, assign a random one

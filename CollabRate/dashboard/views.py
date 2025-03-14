@@ -6,7 +6,6 @@ from .models import Course
 
 @login_required
 def dashboard(request):
-    #color choices for the dashboard
     courses = Course.objects.all() #Fetch all courses 
     return render(request, 'dashboard/dashboard.html', {'courses': courses})
 
