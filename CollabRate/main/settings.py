@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     'accounts.apps.AccountsConfig',
     'collabrate.apps.CollabrateConfig',
+    'dashboard'
 ]
 
 SITE_ID = 1
@@ -119,26 +120,27 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-
 ACCOUNT_LOGIN_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+SOCIALACCOUNT_LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 SOCIALACCOUNT_AUTO_SIGNUP = False
+LOGIN_URL = '/accounts/google/login/'
 
-
-# Google provider configuration
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'offline'},
+        'AUTH_PARAMS': {'access_type': 'offline', 'hd': 'bc.edu'},
     }
 }
 
 SOCIALACCOUNT_FORMS = {
     'signup': 'accounts.forms.CustomSocialSignupForm',
 }
+
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.BCSocialAccountAdapter'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
