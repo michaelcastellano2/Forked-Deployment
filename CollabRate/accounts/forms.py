@@ -6,7 +6,8 @@ class CustomSocialSignupForm(SignupForm):
     user_type = forms.ChoiceField(
         choices=[(CustomUser.STUDENT, 'Student'), (CustomUser.PROFESSOR, 'Professor')],
         required=True,
-        label="I am a"
+        label="I am a",
+        widget=forms.HiddenInput()
     )
 
     def save(self, request):
