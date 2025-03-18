@@ -1,3 +1,4 @@
+/* General Styles */
 body {
     margin: 0;
     padding: 0;
@@ -5,20 +6,19 @@ body {
 }
 
 a {
-    text-decoration: none;  
-    color: inherit;       
+    text-decoration: none;
+    color: inherit;
 }
 
 a:hover, a:focus, a:active {
-    text-decoration: none; 
-    color: inherit;        
+    text-decoration: none;
+    color: inherit;
 }
 
 /* Navbar */
-
 .navbar {
     display: flex;
-    justify-content: space-between; 
+    justify-content: space-between;
     align-items: center;
     background-color: #212121;
     margin: 0;
@@ -27,7 +27,8 @@ a:hover, a:focus, a:active {
 }
 
 .navbar-left .logo {
-    font-size: 20px;
+    font-size: 28px; /* Increased size */
+    font-weight: bold;
     color: #F2F0EF;
     text-decoration: none;
 }
@@ -40,105 +41,66 @@ a:hover, a:focus, a:active {
     border-radius: 5px;
 }
 
+/* Color Bar Under Navbar */
 .color-bar {
     display: flex;
-    width: 100%;   
-    height: 5px;  
-    margin-top: 5px;  
+    width: 100%;
+    height: 5px;
+    margin-top: 5px;
 }
 
 .color-bar div {
-    flex: 1;  
+    flex: 1;
     height: 100%;
 }
 
-.color-bar .color1 { background-color: #872729; } 
-.color-bar .color2 { background-color: #C44B4B; } 
-.color-bar .color3 { background-color: #F2F0EF; } 
-.color-bar .color4 { background-color: #3D5A80; } 
-.color-bar .color5 { background-color: #293241; } 
+.color-bar .color1 { background-color: #872729; }
+.color-bar .color2 { background-color: #C44B4B; }
+.color-bar .color3 { background-color: #F2F0EF; }
+.color-bar .color4 { background-color: #3D5A80; }
+.color-bar .color5 { background-color: #293241; }
 
-/* Landing */
-
-.landing {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    height: 100vh;   
-    padding-top: 32px;
-}
-
-.landing h1 {
-    font-size: 32px;
-    font-weight: 400;
-}
-
-.landing button {
-    background-color: #3D5A80;
-    color: #F2F0EF;
-    border: none;
-    padding: 10px 20px;
-    font-size: 20px;
-    font-weight: 600;
-    border-radius: 25px;
-}
-
-.landing button:hover{
-    background-color: #293241;
-}
-
+/* Login + Register Page */
 .login-container {
     display: flex;
-    height: 100vh;  
+    height: 100vh;
+    width: 100vw;
 }
 
-.landing-img {
-    width: 50%;
-}
-
-/* Login + Register page */
-
+/* Left Panel - Image Section */
 .left-panel {
-    background-color: #F2F0EF;
-    flex: 1; 
+    flex: 1;
+    background-color: #F2F0EF; /* Light Gray */
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 40px;
+}
+
+/* Ensure the image is properly sized */
+.login-img {
+    width: 80%; /* Slightly smaller */
+    max-width: 450px; /* Prevents it from being too large */
+    height: auto;
+    display: block;
 }
 
 .right-panel {
-    background-color: #3D5A80; 
     flex: 1; 
+    background-color: #3D5A80; /* Dark Blue */
     display: flex;
-    align-items: center;
     flex-direction: column;
-    padding: 120px 20px;
-}
-
-.right-panel h1{
-    color: #F2F0EF;
-    font-weight: 400;
+    justify-content: flex-start; /* Move content toward the top */
+    align-items: center; /* Keep content centered horizontally */
     text-align: center;
+    color: white;
+    padding: 40px;
+    height: 100vh; /* Ensure it takes full height */
+    padding-top: 80px; /* Adjust top padding for positioning */
 }
 
-.right-panel h2{
-    color: #F2F0EF;
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 10px;
-}
 
-.right-panel h3{
-    color: #73B6D2;
-    font-size: 20px;
-    font-weight: 300;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    padding: 0;
-    margin: 0;
-}
-
+/* Fix Google Sign-In Button Centering */
 .google-login {
     display: flex;
     align-items: center;
@@ -146,19 +108,43 @@ a:hover, a:focus, a:active {
     background-color: #F2F0EF;
     color: #212121;
     border: none;
-    padding: 10px 15px;
-    font-size: 20px;
-    font-weight: 400;
-    border-radius: 32px;
-    width: 50%;
-    height: 20%;
+    padding: 14px 24px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 50px;
+    width: 300px; /* Ensure proper width */
+    height: 55px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    margin: 0 auto; /* Fully center button */
+    margin-top: 20px; /* Proper spacing from text */
+    text-align: center;
+    transition: background 0.3s ease;
 }
 
-.google-g {
-    width: 15%;
-    margin-left: 6px;
+.google-login:hover {
+    background-color: #E0E0E0;
+    cursor: pointer;
 }
 
-.login-img {
-    width: 100%;
+/* Responsive Fix for Mobile */
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .left-panel, .right-panel {
+        width: 100%;
+        padding: 40px;
+    }
+
+    .login-img {
+        width: 65%; /* Resize image */
+        max-width: 350px;
+    }
+
+    .google-login {
+        width: 90%;
+        max-width: 280px;
+    }
 }
