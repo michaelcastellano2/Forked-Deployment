@@ -1,3 +1,4 @@
+{% load socialaccount %}
 <nav class="navbar">
     <div class="navbar-left" style="margin-left: 15px;"> 
         <a href="/" class="logo" style="font-size: 28px; font-weight: bold;">CollabRate</a>
@@ -11,13 +12,11 @@
     </div>
     <div class="navbar-right" style="margin-right: 15px;"> 
         {% if user.is_authenticated %}
-        <!-- Logout Button -->
         <a href="{% url 'account_logout' %}" class="logout-btn">
             <i class="fas fa-user-circle"></i> Logout
         </a>
         {% else %}
-        <!-- Login Button -->
-        <a href="{% url 'account_login' %}" class="login-btn">
+        <a href="{% provider_login_url 'google' %}" class="login-btn">
             <i class="fas fa-user-circle"></i> Login
         </a>
         {% endif %}
