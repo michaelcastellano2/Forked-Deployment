@@ -1,49 +1,32 @@
 {% extends 'collabrate/base.html' %}
-{% load static %}
-{% load socialaccount %}
+{% load static socialaccount %}
 
-{% block title %}Login{% endblock %}
+{% block link %}
+<link rel="stylesheet" href="{% static 'accounts/login.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid login-container" style="width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden;">
-    <div class="row g-0 w-100 h-100" style="width: 100%; height: 100%; margin: 0; display: flex;">
-        
-        <!-- Left Panel (Image Section) -->
-        <div class="col-md-6 left-panel d-flex justify-content-center align-items-center h-100" 
-             style="background-color: #F2F0EF; height: 100vh; display: flex; width: 50vw;">
-            <img class="img-fluid login-img" src="{% static 'collabrate/images/eval.png' %}" 
-                 alt="Evaluation Image" style="max-width: 90%; height: auto;">
-        </div>
-
-        <!-- Right Panel (Login Section) -->
-        <div class="col-md-6 right-panel d-flex flex-column justify-content-center align-items-center h-100" 
-             style="background-color: #3D5A80; height: 100vh; display: flex; width: 50vw;">
-            <h1 class="text-center" style="font-size: 64px; font-weight: 400; color: white;">
-                Your team evaluation solutions are <strong>one click</strong> away.
-            </h1>            
-            <form method="post" action="{% provider_login_url 'google' %}" class="w-100 text-center">
-                {% csrf_token %}
-                <center> 
-                    <button type="submit" class="google-login" 
-                            style="display: flex; align-items: center; justify-content: center; background-color: #F2F0EF; 
-                                   color: #212121; border: none; padding: 14px 30px; font-size: 30px; font-weight: 400; 
-                                   border-radius: 50px; width: 380px; height: 65px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
-                                   margin-top: 20px; text-align: center; gap: 12px;">
-                        <span style="display: flex; align-items: center; justify-content: center; flex: 1;">
-                            Sign in with Google
-                        </span>
-                        <img src="{% static 'collabrate/images/google.png' %}" alt="Google logo" class="google-icon" 
-                             style="height: 40px; width: 40px;">
-                    </button>
-                </center>
-                
-                
-                
-                
-                
-                
-            </form>
-        </div>
-
+<div class="container-fluid login-container px-0">
+  <div class="row gx-0 h-100">
+    <div class="col-md-6 left-panel">
+      <img 
+        src="{% static 'collabrate/images/eval.png' %}" 
+        alt="Illustration" 
+        class="img-fluid w-80 h-80">
     </div>
+
+    <div class="col-md-6 right-panel d-flex flex-column justify-content-center align-items-center">
+      <h1 class="display-5 mb-5 text-center">
+        Your team evaluation solutions are <strong>one click</strong> away.
+      </h1>
+      <form method="post" action="{% provider_login_url 'google' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn google-login-btn">
+          Sign in with Google
+          <img src="{% static 'collabrate/images/google.png' %}" alt="Google logo" class="google-icon">
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}
