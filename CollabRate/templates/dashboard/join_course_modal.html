@@ -1,7 +1,6 @@
-<!-- templates/dashboard/join_course_modal.html -->
 <div class="modal fade" id="joinCourseModal" tabindex="-1" aria-labelledby="joinCourseModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg ">
+        <div class="modal-content glass-modal-content">
             <form method="post" action="{% url 'join_course' %}">
                 {% csrf_token %}
                 <div class="modal-header">
