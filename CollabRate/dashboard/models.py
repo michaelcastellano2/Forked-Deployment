@@ -1,5 +1,11 @@
 import random
+import string
 from django.db import models
+from accounts.models import CustomUser
+
+def generate_join_code():
+    # Generate a six (6) character alphanumeric code
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 class Course(models.Model):
     SEMESTER_CHOICES = [
@@ -14,17 +20,28 @@ class Course(models.Model):
         "#2980b9", "#7f8c8d", "#bdc3c7", "#34495e"
     ]
 
+    join_code = models.CharField(max_length=6, primary_key=True, unique=True, blank=True)
     code = models.CharField(max_length=20)
     title = models.CharField(max_length=100)
     student_count = models.IntegerField(default=0)
     semester = models.CharField(max_length=10, choices=SEMESTER_CHOICES)
     year = models.IntegerField()
     color = models.CharField(max_length=7, blank=True, null=True)  
+    students = models.ManyToManyField(
+        CustomUser,
+        related_name="enrolled_courses",
+        limit_choices_to={'user_type': CustomUser.STUDENT},
+        blank=True
+    )
 
     def save(self, *args, **kwargs):
-        if not self.color:  # If no color is set, assign a random one
+        if not self.join_code:
+            self.join_code = generate_join_code()
+            while Course.objects.filter(join_code=self.join_code).exists():
+                self.join_code = generate_join_code()
+        if not self.color:
             self.color = random.choice(self.COLOR_CHOICES)
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.code} - {self.title} ({self.semester} {self.year})"
+        return f"{self.code} - {self.title} ({self.semester} {self.year}) - {self.join_code}"
