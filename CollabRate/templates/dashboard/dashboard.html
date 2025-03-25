@@ -2,15 +2,36 @@
 {% block title %}Dashboard{% endblock %}
 {% load static %}
 
+{% block head %}
+<link rel="stylesheet" href="{% static 'dashboard/join_course_modal.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/course_card.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/create_course_modal.css' %}">
+<link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+<script src="https://unpkg.com/@yaireo/tagify"></script>
+{% endblock %}
 
 {% block content %}
+{% include "dashboard/join_course_modal.html" %}
+{% include "dashboard/create_course_modal.html" %}
 
 <div class="d-flex">
     <!-- Include the Sidebar -->
     {% include "dashboard/sidenav.html" %}
 
     <!-- Main Content -->
-    <div class ="container mt-4 ms-4">
+    <div class="container mt-4 ms-4">
+        {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags != 'success' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show"
+                role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         <div class="container mt-5">
             <h1 class="mb-4 text-center"></h1>
 
@@ -24,4 +45,15 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    new Tagify(document.getElementById('invite_email'), {
+        delimiters: ", ",
+        pattern: /^[A-Za-z0-9._%+-]+@bc\.edu$/,
+        dropdown: { enabled: 0 },
+        keepInvalidTags: false
+    });
+</script>
 {% endblock %}

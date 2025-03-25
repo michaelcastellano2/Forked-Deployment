@@ -1,0 +1,49 @@
+<!-- templates/dashboard/create_course_modal.html -->
+<div class="modal fade" id="createCourseModal" tabindex="-1" aria-labelledby="createCourseModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content glass-modal-content">
+      <form method="post" action="{% url 'create_course' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="createCourseModalLabel">Create a Course</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3 mb-4">
+            <div class="col-md-5">
+              <input type="text" name="code" class="form-control form-control-lg" placeholder="Enter Course Identifier"
+                required>
+            </div>
+            <div class="col-md-4">
+              <select name="semester" class="form-select form-select-lg" required>
+                <option value="" disabled selected>Semester</option>
+                <option value="Spring">Spring</option>
+                <option value="Fall">Fall</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <input type="number" name="year" class="form-control form-control-lg" placeholder="Year" required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <input type="text" name="title" class="form-control form-control-lg" placeholder="Enter Course Title"
+              required>
+          </div>
+
+          <div class="p-4 bg-light rounded shadow-sm">
+            <h5 class="mb-3">Invite via Email</h5>
+            <input id="invite_email" name="invite_email" class="form-control form-control-lg"
+              placeholder="Enter email address" />
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 justify-content-end">
+          <button type="submit" class="btn btn-primary btn-lg">Create Course</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
