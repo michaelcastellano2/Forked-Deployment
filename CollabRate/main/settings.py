@@ -11,9 +11,17 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Initialize environment variables
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -141,6 +149,15 @@ SOCIALACCOUNT_FORMS = {
 }
 
 SOCIALACCOUNT_ADAPTER = 'accounts.adapters.BCSocialAccountAdapter'
+
+# Email Validation
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'joszek2004@gmail.com'
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

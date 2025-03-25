@@ -1,7 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponseForbidden 
+from django.http import HttpResponseForbidden
+from django.core.mail import send_mail
+from django.core.signing import TimestampSigner, BadSignature, SignatureExpired 
+from django.urls import reverse
+from django.conf import settings
 from accounts.models import CustomUser
 from .models import Course 
 import json
@@ -72,10 +76,26 @@ def create_course(request):
         except ValueError:
             emails = []
         
+        signer = TimestampSigner()
         for email in emails:
-            if not email['value'].lower().endswith('@bc.edu'):
+            email = email.get('value', '').strip()
+            if not email.lower().endswith('@bc.edu'):
                 continue
-            print(email)
+            token = signer.sign(email)
+            invite_url = request.build_absolute_uri(
+                reverse('course_invite', args=[course.join_code, token])
+            )
+            subject = f"Invitation to join {course.title}"
+            message = (
+                f"Hello,\n\n"
+                f"You have been invited to join the course \"{course.title}\".\n\n"
+                f"Click the following link to join the course:\n{invite_url}\n\n"
+                "If you did not expect this invitation, please ignore this email.\n\n"
+                "Thank you!"
+            )
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [email]
+            send_mail(subject, message, from_email, recipient_list)
         messages.success(request, f"Course {course.title} created. Join Code: {course.join_code}")
     return redirect('dashboard')
 
@@ -99,5 +119,31 @@ def delete_course(request, join_code):
         title = course.title
         course.delete()
         messages.success(request, f"Course {title} has been deleted.")
+    return redirect('dashboard')
+
+@login_required
+def course_invite(request, join_code, token):
+    signer = TimestampSigner()
+    try:
+        invited_email = signer.unsign(token, max_age=3600)
+    except SignatureExpired:
+        messages.error(request, "The invitation link has expired.")
+        return redirect('dashboard')
+    except BadSignature:
+        messages.error(request, "Invalid invitation link.")
+        return redirect('dashboard')
+    
+    course = get_object_or_404(Course, join_code=join_code)
+    if request.user.email.lower() != invited_email.lower():
+        messages.error(request, "The invitation link is intended for a different account. Please sign in with the correct email.")
+        return redirect('dashboard')
+    if course.students.filter(pk=request.user.pk).exists():
+        messages.info(request, f"Already enrolled in {course.title}")
+    else:
+        course.students.add(request.user)
+        course.student_count = course.students.count()
+        course.save()
+        messages.success(request, f"Successfully enrolled in {course.title}.")
+
     return redirect('dashboard')
     
