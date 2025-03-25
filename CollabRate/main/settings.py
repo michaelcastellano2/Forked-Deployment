@@ -132,7 +132,7 @@ LOGIN_URL = '/accounts/google/login/'
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'offline', 'hd': 'bc.edu'},
+        'AUTH_PARAMS': {'access_type': 'offline', 'hd': 'bc.edu', 'prompt': 'select_account'},
     }
 }
 

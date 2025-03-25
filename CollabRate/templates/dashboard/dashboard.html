@@ -2,13 +2,18 @@
 {% block title %}Dashboard{% endblock %}
 {% load static %}
 
-{% block link %}
+{% block head %}
 <link rel="stylesheet" href="{% static 'dashboard/join_course_modal.css' %}">
 <link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/course_card.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/create_course_modal.css' %}">
+<link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+<script src="https://unpkg.com/@yaireo/tagify"></script>
 {% endblock %}
 
 {% block content %}
 {% include "dashboard/join_course_modal.html" %}
+{% include "dashboard/create_course_modal.html" %}
 
 <div class="d-flex">
     <!-- Include the Sidebar -->
@@ -40,4 +45,15 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    new Tagify(document.getElementById('invite_email'), {
+        delimiters: ", ",
+        pattern: /^[A-Za-z0-9._%+-]+@bc\.edu$/,
+        dropdown: { enabled: 0 },
+        keepInvalidTags: false
+    });
+</script>
 {% endblock %}

@@ -33,6 +33,14 @@ class Course(models.Model):
         limit_choices_to={'user_type': CustomUser.STUDENT},
         blank=True
     )
+    professor = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='courses',
+        limit_choices_to={'user_type': CustomUser.PROFESSOR},
+        null=True,
+        blank=True
+    )
 
     def save(self, *args, **kwargs):
         if not self.join_code:
