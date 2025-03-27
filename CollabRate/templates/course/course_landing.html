@@ -1,0 +1,17 @@
+{% extends 'collabrate/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'course/course_landing.css' %}">
+<link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="d-flex">
+    {% include "course/sidenav.html" %}
+</div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}
