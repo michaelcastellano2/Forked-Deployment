@@ -53,7 +53,8 @@ INSTALLED_APPS = [
 
     'accounts.apps.AccountsConfig',
     'collabrate.apps.CollabrateConfig',
-    'dashboard'
+    'dashboard.apps.DashboardConfig',
+    'course.apps.CourseConfig',
 ]
 
 SITE_ID = 1

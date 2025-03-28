@@ -57,6 +57,7 @@ def create_course(request):
         title = request.POST.get('title', '').strip()
         semester = request.POST.get('semester')
         year = request.POST.get('year')
+        color = request.POST.get('color', '').strip()
 
         if not all([code, title, semester, year]):
             messages.error(request, "All fields are required.")
@@ -67,7 +68,7 @@ def create_course(request):
             messages.error(request, f"{code} already exists.")
             return redirect('dashboard')
         
-        course = Course(code=code, title=title, semester=semester, year=int(year), professor=request.user)
+        course = Course(code=code, title=title, semester=semester, year=int(year), color=color, professor=request.user)
         course.save()
 
         raw_emails = request.POST.get('invite_email', '[]')
