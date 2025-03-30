@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.conf import settings
 from accounts.models import CustomUser
 from .models import Course 
+from .models import Team
 import json
 
 @login_required
@@ -147,4 +148,12 @@ def course_invite(request, join_code, token):
         messages.success(request, f"Successfully enrolled in {course.title}.")
 
     return redirect('dashboard')
-    
+
+#Creating and Joining a Team
+
+@login_required 
+def create_team(request,join_code):
+    course = get_object_or_404(Course, join_code = join_code)
+    user = request.user
+    #safeguard for if 
+    is_p
