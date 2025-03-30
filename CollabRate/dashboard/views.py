@@ -148,3 +148,14 @@ def course_invite(request, join_code, token):
 
     return redirect('dashboard')
     
+def peer_results(request, course_code, delivery_number):
+    # dummy data for now
+    context = {
+        'course_code': course_code,
+        'delivery': delivery_number,
+        'score': 9.6,
+        'feedback': """Good job presenting his part of the presentation. Worked well with others when putting together submission and slides.
+        Good time management, flexible with my scheduling conflicts, confident while speaking. Good teamwork/communication.
+        Very communicative. Will and I collaborated together on the functional requirements..."""
+    }
+    return render(request, 'dashboard/peer_results.html', context)

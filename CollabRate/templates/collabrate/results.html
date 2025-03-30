@@ -1,0 +1,18 @@
+{% extends 'collabrate/base.html' %}
+{% block title %}Peer Results{% endblock %}
+{% block content %}
+<div class="results-container">
+    <h1>Your Peer Assessment Results Are Here!</h1>
+    <h2>Your Peer Assessment Score:</h2>
+    <p><strong>{{ score }}/10</strong></p>
+
+    <h2>Qualitative Peer Feedback:</h2>
+    <div class="feedback-box">
+        {% for comment in feedback %}
+            <p>"{{ comment }}"</p>
+        {% empty %}
+            <p>No feedback available yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
