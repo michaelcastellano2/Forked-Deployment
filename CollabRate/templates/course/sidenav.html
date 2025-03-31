@@ -15,11 +15,12 @@
             <span>{{ user.username|capfirst }} ({{ user.user_type|capfirst }})</span>
         </div>
 
+        <!-- Groups - UPDATED - NOW ROUTES TO CREATE_TEAMS -->
         {% if user.user_type == "professor" %}
         <!-- Groups -->
         <div class="d-flex align-items-center px-2 mb-3">
-            <a href="{% url 'groups' course.join_code %}"
-               class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
+            <a href="{% url 'create_team' course.join_code %}"
+                class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
                 <i class="fa-solid fa-user-group fa-1-5x me-2"></i>
                 <span>Groups</span>
             </a>

@@ -87,4 +87,21 @@ class CourseForm(models.Model):
                 f"Open-ended Questions: {self.num_open}, "
                 f"Created At: {self.created_at}, "
                 f"Self Evaluate: {self.self_evaluate}")
+                
+class Team(models.Model):
+    name = models.CharField(max_length=100)
+    course = models.ForeignKey(
+        Course, 
+        on_delete = models.CASCADE, 
+        related_name = 'teams'
+    )
+    students = models.ManyToManyField(
+        CustomUser, 
+        limit_choices_to={'user_type': CustomUser.STUDENT},
+        related_name = 'teams',
+        blank = True
+    )
+
+    def _str_(self): 
+        return f"{self.name} (Course: {self.course.code})"
     
