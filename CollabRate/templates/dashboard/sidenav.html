@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="d-flex flex-column vh-100 bg-dark text-white" style="width: 15%; min-width: 250px; min-height: 100vh;">
+<div class="d-flex flex-column vh-100 bg-dark text-white" style="width: 15%; min-width: 250px; min-height: 150vh;">
     <div class="color-bar mb-4">
         <div class="color1"></div>
         <div class="color2"></div>
@@ -15,19 +15,25 @@
             <span>{{ user.username|capfirst }} ({{ user.user_type|capfirst }})</span>
         </div>
 
-        <!-- Create New Course-->
-        <div class="px-2 mb-3">
-            <a href="#" class="text-white d-flex align-items-center" style="text-decoration: none;" data-bs-toggle="modal"
-                data-bs-target="{% if user.user_type == 'student' %}#joinCourseModal{% else %}#createCourseModal{% endif %}">
-                <i class="fas fa-plus-circle fa-2x"></i>
-                <span class="ms-2">
-                    {% if user.user_type == "professor" %}
-                    Create Course
-                    {% else %}
-                    Join Course
-                    {% endif %}
-                </span>
-            </a>
-        </div>
+    <!-- Create New Course-->
+    <div class="px-2 mb-3">
+        <a href="#" class="text-white d-flex align-items-center" style="text-decoration: none;" data-bs-toggle="modal"
+            data-bs-target="{% if user.user_type == 'student' %}#joinCourseModal{% else %}#createCourseModal{% endif %}">
+            <i class="fas fa-plus-circle fa-2x"></i>
+            <span class="ms-2">
+                {% if user.user_type == "professor" %}
+                Create Course
+                {% else %}
+                Join Course
+                {% endif %}
+            </span>
+        </a>
+    </div>
+
+    <div class="px-2 mb-3">
+        <a href="/dashboard" class="text-white d-flex align-items-center" style="text-decoration: none;">
+            <i class="fas fa-arrow-left fa-2x"></i>
+            <span class="ms-2">Return to Courses</span>
+        </a>
     </div>
 </div>

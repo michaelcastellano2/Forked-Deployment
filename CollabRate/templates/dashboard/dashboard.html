@@ -3,10 +3,10 @@
 {% load static %}
 
 {% block head %}
+<link rel="stylesheet" href="{% static 'dashboard/join_course_modal.css' %}">
 <link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
 <link rel="stylesheet" href="{% static 'dashboard/course_card.css' %}">
-<link rel="stylesheet" href="{% static 'dashboard/course_modal.css' %}">
-<link rel="stylesheet" href="{% static 'dashboard/sidenav.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/create_course_modal.css' %}">
 <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
 <script src="https://unpkg.com/@yaireo/tagify"></script>
 {% endblock %}
@@ -15,35 +15,34 @@
 {% include "dashboard/join_course_modal.html" %}
 {% include "dashboard/create_course_modal.html" %}
 
-<div class="d-flex">
-    <!-- Include the Sidebar -->
-    {% include "dashboard/sidenav.html" %}
+<div class="d-flex flex-row">
 
-    <!-- Main Content -->
-    <div class="container mt-4 ms-4">
-        {% if messages %}
-        <div class="container mt-3">
-            {% for message in messages %}
-            <div class="alert alert-{% if message.tags != 'success' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show"
-                role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
+        <div class="d-flex">
+        {% include "dashboard/sidenav.html" %}
         </div>
-        {% endif %}
+
         <div class="container mt-5">
-            <h1 class="mb-4 text-center"></h1>
+        
+            {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags != 'success' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show"
+                    role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
             <div class="row">
                 {% for course in courses %}
-                <div class="col-md-4 mb-4">
+                <div class="col-md-4 mb-4" style="width: 350px; margin: 4px;">
                     {% include "dashboard/course_card.html" %}
                 </div>
                 {% endfor %}
             </div>
         </div>
-    </div>
 </div>
 {% endblock %}
 

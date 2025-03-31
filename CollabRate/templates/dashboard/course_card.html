@@ -11,8 +11,26 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="courseMenu{{ course.join_code }}">
                         <li>
                             {% if user.user_type == "professor" %}
+
+                            <form method="post" action="{% url 'create_form' course.join_code %}">
+                                {% csrf_token %}
+
+                                <button type="submit" class="dropdown-item">
+                                    <i class="fa-solid fa-plus"></i> Create Form
+                                </button>
+                            </form>
+
+                            <form method="post" action="{% url 'view_forms' course.join_code %}">
+                                {% csrf_token %}
+
+                                <button type="submit" class="dropdown-item">
+                                    <i class="fa-solid fa-pencil"></i> View Forms
+                                </button>
+                            </form>
+
                             <form method="post" action="{% url 'delete_course' course.join_code %}">
                                 {% csrf_token %}
+
                                 <button type="submit" class="dropdown-item text-danger">
                                     <i class="fas fa-trash me-1"></i> Delete Course
                                 </button>
