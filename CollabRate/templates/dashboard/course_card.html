@@ -15,6 +15,14 @@
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="courseMenu{{ course.join_code }}">
                     <li>
                         {% if user.user_type == "professor" %}
+                        <a href="{% url 'create_form' course.join_code %}" class="dropdown-item">
+                            <i class="fa-solid fa-plus"></i> &nbspCreate Form
+                        </a>
+
+                        <a href="{% url 'view_forms' course.join_code %}" class="dropdown-item">
+                            <i class="fa-solid fa-pencil"></i> &nbspView Forms
+                        </a>
+                        
                         <form method="post" action="{% url 'delete_course' course.join_code %}">
                             {% csrf_token %}
                             <button type="submit" class="dropdown-item text-danger">
@@ -35,7 +43,6 @@
         </div>        
         <p class="text-muted">{{ course.title }}</p>
     </div>
- 
  
     <div class="p-3 d-flex justify-content-between w-100"
         style="background-color: {{ course.color|default:'#4CAF50' }}; color: white; border-radius: 0 0 16px 16px; height: 17.5vh; width: 100%;">

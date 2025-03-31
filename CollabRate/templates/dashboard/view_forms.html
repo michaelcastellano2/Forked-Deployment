@@ -1,0 +1,58 @@
+{% extends 'collabrate/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'dashboard/join_course_modal.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/course_card.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/create_course_modal.css' %}">
+<link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+<script src="https://unpkg.com/@yaireo/tagify"></script>
+{% endblock %}
+
+{% block content %}
+{% include "dashboard/join_course_modal.html" %}
+{% include "dashboard/create_course_modal.html" %}
+
+<div class="d-flex">
+    {% include "dashboard/sidenav.html" %}
+    <div class="container mt-5">
+        <h2>Saved Forms</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Form Name</th>
+                    <th>Due Date</th>
+                    <th>Due Time</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in forms %}
+                <tr>
+                    <td>
+                        <a href="{% url 'edit_form' join_code=course.join_code form_id=form.form_id %}">{{ form.name }}</a>
+                    </td>
+                    <td>{{ form.due_date }}</td>
+                    <td>{{ form.due_time }}</td>
+                    <td>
+
+                        <form method="post" action="{% url 'delete_form' join_code=course.join_code form_id=form.form_id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No forms found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
