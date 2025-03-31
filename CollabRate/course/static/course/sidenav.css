@@ -1,3 +1,11 @@
+.d-flex {
+    display: flex;
+}
+
+.main-container {
+    flex: 1;
+}
+
 .color-bar {
     display: flex;
     width: 100%;
@@ -6,7 +14,7 @@
     margin: 0;
 }
 
-.color-bar>div {
+.color-bar > div {
     flex: 1;
 }
 

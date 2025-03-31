@@ -1,0 +1,31 @@
+{% extends 'collabrate/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4 p-4 bg-red-300 text-white rounded-xl shadow-md">
+        <h2 class="text-xl font-bold">CSCI 3356.01 | Software Engineering | Delivery 2</h2>
+    </div>
+
+    <h1 class="text-3xl font-bold text-center my-6">Your Peer Assessment Results Are Here!</h1>
+
+    <a href="{% url 'dashboard' %}" class="text-blue-500 underline hover:text-blue-700 text-sm mb-4 inline-block">
+        ← Return to Dashboard
+    </a>
+    
+    <div class="text-center text-lg font-semibold">
+        Your Peer Assessment Score:  
+        <span class="text-black text-2xl font-bold">9.6/10</span>
+    </div>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Qualitative Peer Feedback:</h2>
+
+    <div class="bg-white p-4 rounded-xl shadow-md overflow-y-auto max-h-64">
+        <p class="text-gray-800 text-justify">
+            "Good job presenting his part of the presentation. Worked well with others when putting together submission and slides.
+            Good time management, flexible with my scheduling conflicts, confident while speaking. Very communicative.
+            Will and I collaborated together on the functional requirements..."
+        </p>
+    </div>
+</div>
+{% endblock %}
