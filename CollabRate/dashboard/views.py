@@ -7,10 +7,12 @@ from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
 from django.urls import reverse
 from django.conf import settings
 from accounts.models import CustomUser
+from .models import Course, Team
 from .models import Course, CourseForm
 import json
 from django.http import HttpRequest
 from datetime import date,time
+
 
 
 @login_required
@@ -150,7 +152,50 @@ def course_invite(request, join_code, token):
         messages.success(request, f"Successfully enrolled in {course.title}.")
 
     return redirect('dashboard')
+
+#Creating and Joining a Team
+
+@login_required
+def create_team(request, join_code):
+    course = get_object_or_404(Course, join_code=join_code)
+    user = request.user
     
+    # Safeguard
+    is_professor = (user == course.professor)
+    is_enrolled = (
+        user.user_type == CustomUser.STUDENT and
+        course.students.filter(id=user.id).exists()
+    )
+    if not (is_professor or is_enrolled):
+        return HttpResponseForbidden("You do not have permission to create a team for this course.")
+    
+    if request.method == "POST":
+        team_name = request.POST.get("team_name", "")
+        selected_ids = request.POST.getlist("students")
+        
+        if not team_name:
+            messages.error(request, "Team name is required.")
+            return render(request, "dashboard/create_team.html", {
+                "course": course,
+                "students": course.students.all()
+            })
+        
+        # Create new team
+        team = Team.objects.create(name=team_name, course=course)
+        enrolled_students = course.students.filter(id__in=selected_ids)
+        team.students.set(enrolled_students)
+        
+        if is_enrolled and user not in team.students.all():
+            team.students.add(user)
+        
+        messages.success(request, f"Team '{team.name}' created successfully.")
+        return redirect('create_team', join_code=course.join_code)
+
+    # GET request show the empty form
+    return render(request, "dashboard/create_team.html", {
+        "course": course,
+        "students": course.students.all()
+    })
 def peer_results(request, course_code, delivery_number):
     # dummy data for now
     context = {
