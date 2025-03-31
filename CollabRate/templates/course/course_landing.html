@@ -3,100 +3,8 @@
 {% load static %}
 
 {% block head %}
-<style>
-    body {
-        font-family: 'Montserrat', sans-serif;
-        background-color: #f7f5f3;
-        color: #2e2e2e;
-    }
-
-    .d-flex {
-        display: flex;
-    }
-
-    .main-container {
-        flex: 1;
-        padding: 1rem 2rem 2.5rem 1rem;
-        height: 100vh;
-        overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: #999 transparent;
-    }
-
-    .main-container::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    .main-container::-webkit-scrollbar-thumb {
-        background-color: #999;
-        border-radius: 4px;
-    }
-
-    .main-container::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .course-header {
-        background-color: #f1675d;
-        padding: 1.75rem 2.5rem;
-        color: #2e2e2e;
-        font-size: 1.3rem;
-        border-radius: 0.4rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .course-header b {
-        font-weight: 600;
-    }
-
-    .section-title {
-        font-size: 1.75rem;
-        font-weight: 600;
-        margin-bottom: 1.25rem;
-        color: #2e2e2e;
-    }
-
-    .card {
-        background-color: #f1f1f1;
-        border-radius: 0.6rem;
-        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.08);
-        padding: 1rem 1.25rem;
-        margin-bottom: 1.25rem;
-        max-width: 520px;
-        position: relative;
-        color: #3a3a3a;
-    }
-
-    .card .info p {
-        font-weight: 600;
-        font-size: 1rem;
-        margin: 0;
-        color: #2e2e2e;
-    }
-
-    .card .info small {
-        color: #666666;
-        font-size: 0.875rem;
-    }
-
-    .dot {
-        width: 11px;
-        height: 11px;
-        border-radius: 50%;
-        position: absolute;
-        top: 5px;
-        right: 5px;
-    }
-
-    .dot.red {
-        background-color: #f1675d;
-    }
-
-    .dot.green {
-        background-color: #62c06f;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'course/course_landing.css' %}">
+<link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -106,7 +14,7 @@
     {% if user.user_type == "student" %}
         <!-- Student view (your Figma-styled layout) -->
         <div class="main-container">
-            <div class="course-header"><b>CSCI 3356.01</b> | Software Engineering</div>
+            <div class="course-header" style="background-color: {{ course.color }};"><b>{{ course.code }}</b> | {{ course.title }}</div>
 
             <h1 class="section-title">To Do</h1>
             <div class="card">

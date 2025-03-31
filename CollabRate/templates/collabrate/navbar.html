@@ -12,7 +12,7 @@
     </div>
     <div class="navbar-right" style="margin-right: 15px;"> 
         {% if user.is_authenticated %}
-        <a href="{% url 'account_logout' %}" class="logout-btn">
+        <a href="{% url 'account_logout' %}" class="logout-btn text-decoration-none text-reset">
             <i class="fas fa-user-circle"></i> Logout
         </a>
         {% else %}
