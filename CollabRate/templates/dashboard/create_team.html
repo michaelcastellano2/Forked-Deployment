@@ -12,10 +12,10 @@
     <!-- Main content -->
     <div class="flex-fill p-4">
 
-        <!-- Course header with "Create New Group" button -->
+        <!-- header -->
         <div class="d-flex justify-content-between align-items-center p-3 mb-3" style="background-color: #f05a28; border-radius: 0.25rem;">
             <h2 class="text-white mb-0">{{ course.code }} | {{ course.title }}</h2>
-            <!-- Button that toggles a collapsible form below -->
+            <!-- Button that toggles collapsible form-->
             <button class="btn btn-light" data-bs-toggle="collapse" data-bs-target="#createTeamForm">
                 + Create New Group
             </button>
@@ -50,7 +50,7 @@
             </div>
         </div>
 
-        <!-- Accordion listing existing teams in this course -->
+        <!-- Listing existing teams in this course -->
         {% if course.team_set.all %}
             <div class="accordion" id="teamsAccordion">
                 {% for team in course.team_set.all %}

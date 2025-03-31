@@ -7,9 +7,9 @@ from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
 from django.urls import reverse
 from django.conf import settings
 from accounts.models import CustomUser
-from .models import Course 
-from .models import Team
+from .models import Course, Team
 import json
+
 
 @login_required
 def dashboard(request):
@@ -151,13 +151,6 @@ def course_invite(request, join_code, token):
 
 #Creating and Joining a Team
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.http import HttpResponseForbidden
-
-from .models import Course, Team, CustomUser
-
 @login_required
 def create_team(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
@@ -178,7 +171,6 @@ def create_team(request, join_code):
         
         if not team_name:
             messages.error(request, "Team name is required.")
-            # Rerender the form with error message
             return render(request, "dashboard/create_team.html", {
                 "course": course,
                 "students": course.students.all()
@@ -193,7 +185,6 @@ def create_team(request, join_code):
             team.students.add(user)
         
         messages.success(request, f"Team '{team.name}' created successfully.")
-        # Redirect back
         return redirect('create_team', join_code=course.join_code)
 
     # GET request show the empty form
