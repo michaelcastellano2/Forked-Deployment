@@ -151,9 +151,53 @@ def course_invite(request, join_code, token):
 
 #Creating and Joining a Team
 
-@login_required 
-def create_team(request,join_code):
-    course = get_object_or_404(Course, join_code = join_code)
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import HttpResponseForbidden
+
+from .models import Course, Team, CustomUser
+
+@login_required
+def create_team(request, join_code):
+    course = get_object_or_404(Course, join_code=join_code)
     user = request.user
-    #safeguard for if 
-    is_p
+    
+    # Safeguard
+    is_professor = (user == course.professor)
+    is_enrolled = (
+        user.user_type == CustomUser.STUDENT and
+        course.students.filter(id=user.id).exists()
+    )
+    if not (is_professor or is_enrolled):
+        return HttpResponseForbidden("You do not have permission to create a team for this course.")
+    
+    if request.method == "POST":
+        team_name = request.POST.get("team_name", "")
+        selected_ids = request.POST.getlist("students")
+        
+        if not team_name:
+            messages.error(request, "Team name is required.")
+            # Rerender the form with error message
+            return render(request, "dashboard/create_team.html", {
+                "course": course,
+                "students": course.students.all()
+            })
+        
+        # Create new team
+        team = Team.objects.create(name=team_name, course=course)
+        enrolled_students = course.students.filter(id__in=selected_ids)
+        team.students.set(enrolled_students)
+        
+        if is_enrolled and user not in team.students.all():
+            team.students.add(user)
+        
+        messages.success(request, f"Team '{team.name}' created successfully.")
+        # Redirect back
+        return redirect('create_team', join_code=course.join_code)
+
+    # GET request show the empty form
+    return render(request, "dashboard/create_team.html", {
+        "course": course,
+        "students": course.students.all()
+    })
