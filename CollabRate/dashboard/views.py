@@ -60,6 +60,7 @@ def create_course(request):
         title = request.POST.get('title', '').strip()
         semester = request.POST.get('semester')
         year = request.POST.get('year')
+        color = request.POST.get('color', '').strip()
 
         if not all([code, title, semester, year]):
             messages.error(request, "All fields are required.")
@@ -70,7 +71,7 @@ def create_course(request):
             messages.error(request, f"{code} already exists.")
             return redirect('dashboard')
         
-        course = Course(code=code, title=title, semester=semester, year=int(year), professor=request.user)
+        course = Course(code=code, title=title, semester=semester, year=int(year), color=color, professor=request.user)
         course.save()
 
         raw_emails = request.POST.get('invite_email', '[]')
@@ -150,6 +151,18 @@ def course_invite(request, join_code, token):
 
     return redirect('dashboard')
     
+def peer_results(request, course_code, delivery_number):
+    # dummy data for now
+    context = {
+        'course_code': course_code,
+        'delivery': delivery_number,
+        'score': 9.6,
+        'feedback': """Good job presenting his part of the presentation. Worked well with others when putting together submission and slides.
+        Good time management, flexible with my scheduling conflicts, confident while speaking. Good teamwork/communication.
+        Very communicative. Will and I collaborated together on the functional requirements..."""
+    }
+    return render(request, 'dashboard/peer_results.html', context)
+
 @login_required
 def create_form(request, join_code):
     course = Course.objects.get(join_code=join_code)

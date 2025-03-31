@@ -22,4 +22,5 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path("", include("collabrate.urls")),
     path('dashboard/', include('dashboard.urls')),
+    path('course/', include('course.urls')),
 ]
