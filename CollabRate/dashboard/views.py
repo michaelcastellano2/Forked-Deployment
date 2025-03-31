@@ -7,11 +7,8 @@ from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
 from django.urls import reverse
 from django.conf import settings
 from accounts.models import CustomUser
-<<<<<<< HEAD
 from .models import Course, Team
-=======
 from .models import Course, CourseForm
->>>>>>> main
 import json
 from django.http import HttpRequest
 from datetime import date,time

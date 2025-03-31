@@ -86,7 +86,7 @@ class CourseForm(models.Model):
                 f"Likert Questions: {self.num_likert}, "
                 f"Open-ended Questions: {self.num_open}, "
                 f"Created At: {self.created_at}, "
-                f"Self Evaluate: {self.self_evaluate}"
+                f"Self Evaluate: {self.self_evaluate}")
                 
 class Team(models.Model):
     name = models.CharField(max_length=100)
