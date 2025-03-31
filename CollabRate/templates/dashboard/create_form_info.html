@@ -18,12 +18,12 @@
 {% block content %}
 <div class="d-flex">
 
-    <div class="col-md-3">
+    <div class="d-flex col-md-3">
         {% include "dashboard/sidenav.html" %}
     </div>
 
     <div class="col-md-9">
-        <div class="form-info mt-5">
+        <div class="form-info mt-4" style="width: 100vw; margin-left: 24px;">
             <div class="top-banner">
                 <h1><strong>{{ course.code }} | </strong>{{ course.title }}</h1> 
             </div>
@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" style="background-color: #007bff;" type="checkbox" id="selfEvaluateToggle" name="self_evaluate" {% if form.self_evaluate %}checked{% endif %}>
+                    <input class="form-check-input" style="background-color: {{ course.color }};" type="checkbox" id="selfEvaluateToggle" name="self_evaluate" {% if form.self_evaluate %}checked{% endif %}>
                     <label class="form-check-label" for="selfEvaluateToggle">Require that students self-evaluate</label>
                 </div>
 

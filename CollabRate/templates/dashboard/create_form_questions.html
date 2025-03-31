@@ -17,11 +17,11 @@
 {% block content %}
 <div class="d-flex">
 
-    <div class="col-md-3">
+    <div class="d-flex col-md-3">
         {% include "dashboard/sidenav.html" %}
     </div>
 
-    <div class="col-md-9 container mt-5">
+    <div class="col-md-9 container mt-4" style="width: 100vw; margin-left: 24px;">
         <div class="top-banner">
             <h1><strong>{{ course.code }} | </strong>{{ course.title }}</h1>
         </div>

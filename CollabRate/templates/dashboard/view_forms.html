@@ -10,6 +10,31 @@
 <link rel="stylesheet" href="{% static 'dashboard/create_course_modal.css' %}">
 <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
 <script src="https://unpkg.com/@yaireo/tagify"></script>
+<style>
+    .top-banner {
+        background-color: {{ course.color }};
+    }
+
+    .top-banner {
+    border-radius: 8px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    width: 90%;
+}
+
+.top-banner h1 {
+    margin-left: 12px;
+    margin-top: 10px;
+    font-size: 32px;
+    color: black;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6), /* Light white shadow */
+    -1px -1px 2px rgba(255, 255, 255, 0.6),
+    1px -1px 2px rgba(255, 255, 255, 0.6),
+    -1px 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+</style>
 {% endblock %}
 
 {% block content %}
@@ -17,9 +42,13 @@
 {% include "dashboard/create_course_modal.html" %}
 
 <div class="d-flex">
+    <div class="d-flex">
     {% include "dashboard/sidenav.html" %}
-    <div class="container mt-5">
-        <h2>Saved Forms</h2>
+</div>
+    <div class="container mt-4" style="width: 100vw; margin-left: 12px;">
+        <div class="top-banner">
+            <h1><strong>{{ course.code }} | </strong>{{ course.title }}</h1>
+        </div>
         <table class="table table-striped">
             <thead>
                 <tr>
