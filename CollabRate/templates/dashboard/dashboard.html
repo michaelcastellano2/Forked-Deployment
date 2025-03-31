@@ -16,10 +16,10 @@
 {% include "dashboard/create_course_modal.html" %}
 
 <div class="d-flex">
-    <!-- Include the Sidebar -->
+
     {% include "dashboard/sidenav.html" %}
 
-    <!-- Main Content -->
+
     <div class="container mt-4 ms-4">
         {% if messages %}
         <div class="container mt-3">
@@ -32,16 +32,17 @@
             {% endfor %}
         </div>
         {% endif %}
-        <div class="container mt-5">
-            <h1 class="mb-4 text-center"></h1>
+    </div>
+    
+    <div class="container mt-5">
+        <h1 class="mb-4 text-center"></h1>
 
-            <div class="row">
-                {% for course in courses %}
-                <div class="col-md-4 mb-4">
-                    {% include "dashboard/course_card.html" %}
-                </div>
-                {% endfor %}
+        <div class="row">
+            {% for course in courses %}
+            <div class="col-md-4 mb-4">
+                {% include "dashboard/course_card.html" %}
             </div>
+            {% endfor %}
         </div>
     </div>
 </div>
