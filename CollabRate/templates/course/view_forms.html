@@ -4,12 +4,7 @@
 {% load static %}
 
 {% block head %}
-<link rel="stylesheet" href="{% static 'dashboard/join_course_modal.css' %}">
-<link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
-<link rel="stylesheet" href="{% static 'dashboard/course_card.css' %}">
-<link rel="stylesheet" href="{% static 'dashboard/create_course_modal.css' %}">
-<link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
-<script src="https://unpkg.com/@yaireo/tagify"></script>
+<link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
 <style>
     .top-banner {
         background-color: {{ course.color }};
@@ -43,7 +38,7 @@
 
 <div class="d-flex">
     <div class="d-flex">
-    {% include "dashboard/sidenav.html" %}
+    {% include "course/sidenav.html" %}
 </div>
     <div class="container mt-4" style="width: 100vw; margin-left: 12px;">
         <div class="top-banner">

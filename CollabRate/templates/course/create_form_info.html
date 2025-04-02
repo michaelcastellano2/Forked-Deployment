@@ -3,10 +3,8 @@
 {% load static %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'dashboard/join_course_modal.css' %}">
-    <link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'dashboard/create_course_modal.css' %}">
-    <link rel="stylesheet" href="{% static 'dashboard/create_form_info.css' %}">
+    <link rel="stylesheet" href="{% static 'course/create_form_info.css' %}">
+    <link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
     <style>
         .top-banner {
             background-color: {{ course.color }}; 
@@ -19,7 +17,7 @@
 <div class="d-flex">
 
     <div class="d-flex col-md-3">
-        {% include "dashboard/sidenav.html" %}
+        {% include "course/sidenav.html" %}
     </div>
 
     <div class="col-md-9">
