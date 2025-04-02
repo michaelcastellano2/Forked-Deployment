@@ -36,7 +36,7 @@ def create_team(request, join_code):
         
         if not team_name:
             messages.error(request, "Team name is required.")
-            return render(request, "dashboard/create_team.html", {
+            return render(request, "course/create_team.html", {
                 "course": course,
                 "students": course.students.all()
             })
@@ -53,7 +53,7 @@ def create_team(request, join_code):
         return redirect('create_team', join_code=course.join_code)
 
     # GET request show the empty form
-    return render(request, "dashboard/create_team.html", {
+    return render(request, "course/create_team.html", {
         "course": course,
         "students": course.students.all()
     })
@@ -112,7 +112,7 @@ def create_form_questions(request, join_code, form_id):
 
         form.save()
 
-    return render(request, 'dashboard/create_form_questions.html', {
+    return render(request, 'course/create_form_questions.html', {
         'join_code': join_code,
         'form_id': form_id,
         'range_likert': range(form.num_likert),
@@ -156,7 +156,7 @@ def edit_form(request, join_code, form_id):
         messages.success(request, f"Form '{form.name}' has been updated successfully.")
         return redirect('view_forms', join_code=join_code)
     
-    return render(request, 'dashboard/edit_form.html', {
+    return render(request, 'course/edit_form.html', {
         'form': form,
         'course': course,
     })
