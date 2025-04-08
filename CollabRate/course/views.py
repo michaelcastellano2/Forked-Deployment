@@ -5,7 +5,6 @@ from django.http import HttpResponseForbidden
 from dashboard.models import Course
 from accounts.models import CustomUser
 from .models import CourseForm, Team
-from datetime import date, time
 
 @login_required
 def course_detail(request, join_code):
@@ -58,67 +57,81 @@ def create_team(request, join_code):
         "students": course.students.all()
     })
 
-
 @login_required
 def create_form(request, join_code):
-    course = Course.objects.get(join_code=join_code)
-
-    form = CourseForm(
-    course=course,
-    name="Untitled form",
-    due_date=date.today(), 
-    due_time=time(23, 59),        
-    num_likert=3,
-    num_open=1,
-    self_evaluate=False
-    )
-    form.save()
-
-    return redirect('create_form_info', join_code=join_code, form_id=form.form_id)
-
-@login_required
-def create_form_info(request, join_code, form_id):
-    course = Course.objects.get(join_code=join_code)
-    form = CourseForm.objects.get(form_id=form_id)
-
-    if request.method == 'POST':
-        return redirect('create_form_questions', 
-            join_code=course.join_code,
-            form=form)
-    
-    return render(request, 'course/create_form_info.html', {'course': course, 'form_id': form_id})
-
-@login_required
-def create_form_questions(request, join_code, form_id):
-    course = Course.objects.get(join_code=join_code)
-    form = CourseForm.objects.get(form_id=form_id)
+    course = get_object_or_404(Course, join_code=join_code)
 
     if request.method == "POST":
+        name = request.POST.get("form_name", "Untitled Form")
+        self_evaluate = "self_evaluate" in request.POST
+        num_likert = int(request.POST.get("num_likert", 0))
+        num_open_ended = int(request.POST.get("num_open_ended", 0))
+        due_date = request.POST.get("due_date")
+        due_time = request.POST.get("due_time")
 
-        form_name = request.POST.get('form_name', '')
-        due_date = request.POST.get('due_date', '')
-        due_time = request.POST.get('due_time', '')
-        self_evaluate = 'self_evaluate' in request.POST
-        num_likert = int(request.POST.get('num_likert', 3))
-        num_open = int(request.POST.get('num_open', 1))
+        course_form = CourseForm.objects.create(
+            course=course,
+            name=name,
+            self_evaluate=self_evaluate,
+            num_likert=num_likert,
+            num_open_ended=num_open_ended,
+            due_date=due_date,
+            due_time=due_time,
+        )
+        course_form.save()
 
-        form.name = form_name
-        form.due_date = due_date
-        form.due_time = due_time
-        form.self_evaluate = self_evaluate
-        form.num_likert = num_likert
-        form.num_open = num_open
-        form.course = course 
+        return redirect('draft_form_questions', join_code=course.join_code, course_form_id=course_form.pk)
+    
+    return render(request, 'course/form.html', {'course': course})
 
-        form.save()
+@login_required
+def draft_form_questions(request, join_code, course_form_id):
+    return render(request, 'course')
 
-    return render(request, 'course/create_form_questions.html', {
-        'join_code': join_code,
-        'form_id': form_id,
-        'range_likert': range(form.num_likert),
-        'range_open': range(form.num_open),
-        'course': course
-    })
+
+# @login_required
+# def create_form_info(request, join_code, form_id):
+#     course = Course.objects.get(join_code=join_code)
+#     form = CourseForm.objects.get(form_id=form_id)
+
+#     if request.method == 'POST':
+#         return redirect('create_form_questions', 
+#             join_code=course.join_code,
+#             form=form)
+    
+#     return render(request, 'course/create_form_info.html', {'course': course, 'form_id': form_id})
+
+# @login_required
+# def create_form_questions(request, join_code, form_id):
+#     course = get_object_or_404(Course, join_code=join_code)
+#     form = get_object_or_404(CourseForm, pk=form_id)
+
+#     if request.method == "POST":
+
+#         form_name = request.POST.get('form_name', '')
+#         due_date = request.POST.get('due_date', '')
+#         due_time = request.POST.get('due_time', '')
+#         self_evaluate = 'self_evaluate' in request.POST
+#         num_likert = int(request.POST.get('num_likert', 3))
+#         num_open_ended = int(request.POST.get('num_open_ended', 1))
+
+#         form.name = form_name
+#         form.due_date = due_date
+#         form.due_time = due_time
+#         form.self_evaluate = self_evaluate
+#         form.num_likert = num_likert
+#         form.num_open_ended = num_open_ended
+#         form.course = course 
+
+#         form.save()
+
+#     return render(request, 'course/create_form_questions.html', {
+#         'join_code': join_code,
+#         'form_id': form_id,
+#         'range_likert': range(form.num_likert),
+#         'range_open': range(form.num_open_ended),
+#         'course': course
+#     })
 
 @login_required
 def view_forms(request, join_code):
