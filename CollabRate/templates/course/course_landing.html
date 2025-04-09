@@ -51,6 +51,14 @@
     {% else %}
         <!-- Professor view - unchanged from original -->
         <div class="main-container">
+            <h1>Hello professor!</h1>
+            <button><a href="{% url 'create_team' course.join_code %}">Create/Manage Teams</a></button>
+            <button><a href="{% url 'create_form' course.join_code %}">Create Form</a></button>
+            <form method="POST" action="{% url 'clear_course_forms' course.join_code %}">
+                {% csrf_token %}
+                <button type="submit">Clear Course Forms (DEBUG)</button>
+            </form>
+
         </div>
     {% endif %}
 </div>

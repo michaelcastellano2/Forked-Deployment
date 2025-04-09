@@ -131,3 +131,16 @@ def edit_form(request, join_code, form_id):
         'form': form,
         'course': course,
     })
+
+def clear_course_forms(request, join_code):
+    # Assuming you have a CourseForm model to clear forms
+    try:
+        course = Course.objects.get(join_code=join_code)
+        # Assuming the course forms are related to the course
+        CourseForm.objects.filter(course=course).delete()
+
+        messages.success(request, 'All course forms have been cleared!')
+    except Course.DoesNotExist:
+        messages.error(request, 'Course not found.')
+
+    return redirect('course_detail', join_code=join_code)
