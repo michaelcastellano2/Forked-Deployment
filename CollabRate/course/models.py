@@ -20,11 +20,11 @@ class CourseForm(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     self_evaluate = models.BooleanField(default=False)
     teams = models.ManyToManyField('Team', related_name="course_forms", blank=True)
-    color_1 = models.CharField(max_length=7, validators=[hex_validator])
-    color_2 = models.CharField(max_length=7, validators=[hex_validator])
-    color_3 = models.CharField(max_length=7, validators=[hex_validator])
-    color_4 = models.CharField(max_length=7, validators=[hex_validator])
-    color_5 = models.CharField(max_length=7, validators=[hex_validator])
+    color_1 = models.CharField(max_length=7, validators=[hex_validator], default="#872729")
+    color_2 = models.CharField(max_length=7, validators=[hex_validator], default="#C44B4B")
+    color_3 = models.CharField(max_length=7, validators=[hex_validator], default="#F2F0EF")
+    color_4 = models.CharField(max_length=7, validators=[hex_validator], default="#3D5A80")
+    color_5 = models.CharField(max_length=7, validators=[hex_validator], default="#293241")
 
 
     def save(self, *args, **kwargs):

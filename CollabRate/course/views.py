@@ -61,6 +61,15 @@ def create_team(request, join_code):
 def create_form(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
 
+    # Default color values
+    default_colors = {
+        'color_1': "#872729",  # default color 1
+        'color_2': "#C44B4B",  # default color 2
+        'color_3': "#F2F0EF",  # default color 3
+        'color_4': "#3D5A80",  # default color 4
+        'color_5': "#293241",  # default color 5
+    }
+
     if request.method == "POST":
         name = request.POST.get("form_name", "Untitled Form")
         self_evaluate = "self_evaluate" in request.POST
@@ -68,6 +77,13 @@ def create_form(request, join_code):
         num_open_ended = int(request.POST.get("num_open_ended", 0))
         due_date = request.POST.get("due_date")
         due_time = request.POST.get("due_time")
+        
+        # Get color values from POST request or use default
+        color_1 = request.POST.get('color_1', default_colors['color_1'])
+        color_2 = request.POST.get('color_2', default_colors['color_2'])
+        color_3 = request.POST.get('color_3', default_colors['color_3'])
+        color_4 = request.POST.get('color_4', default_colors['color_4'])
+        color_5 = request.POST.get('color_5', default_colors['color_5'])
 
         course_form = CourseForm.objects.create(
             course=course,
@@ -77,12 +93,22 @@ def create_form(request, join_code):
             num_open_ended=num_open_ended,
             due_date=due_date,
             due_time=due_time,
+            color_1=color_1,
+            color_2=color_2,
+            color_3=color_3,
+            color_4=color_4,
+            color_5=color_5,
         )
         course_form.save()
 
         return redirect('draft_questions', join_code=join_code, course_form_id=course_form.pk)
-    
-    return render(request, 'course/manage_forms.html', {'course': course})
+
+    # Pass the default color values to the template
+    return render(request, 'course/manage_forms.html', {
+        'course': course,
+        'default_colors': default_colors
+    })
+
 
 @login_required
 def draft_questions(request, join_code, course_form_id):
@@ -122,6 +148,11 @@ def edit_form(request, join_code, form_id):
         form.due_date = request.POST.get('due_date')
         form.due_time = request.POST.get('due_time')
         form.self_evaluate = 'self_evaluate' in request.POST
+        form.color_1 = request.POST.get('color_1')
+        form.color_2 = request.POST.get('color_2')
+        form.color_3 = request.POST.get('color_3')
+        form.color_4 = request.POST.get('color_4')
+        form.color_5 = request.POST.get('color_5')
 
         form.save() 
         messages.success(request, f"Form '{form.name}' has been updated successfully.")
