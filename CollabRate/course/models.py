@@ -20,6 +20,12 @@ class CourseForm(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     self_evaluate = models.BooleanField(default=False)
     teams = models.ManyToManyField('Team', related_name="course_forms", blank=True)
+    color_1 = models.CharField(max_length=7, validators=[hex_validator])
+    color_2 = models.CharField(max_length=7, validators=[hex_validator])
+    color_3 = models.CharField(max_length=7, validators=[hex_validator])
+    color_4 = models.CharField(max_length=7, validators=[hex_validator])
+    color_5 = models.CharField(max_length=7, validators=[hex_validator])
+
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -32,15 +38,10 @@ class Likert(models.Model):
     question = models.TextField()
     order = models.IntegerField()
     option_1 = models.CharField(max_length=255)
-    color_1 = models.CharField(max_length=7, validators=[hex_validator])
     option_2 = models.CharField(max_length=255)
-    color_2 = models.CharField(max_length=7, validators=[hex_validator])
     option_3 = models.CharField(max_length=255)
-    color_3 = models.CharField(max_length=7, validators=[hex_validator])
     option_4 = models.CharField(max_length=255)
-    color_4 = models.CharField(max_length=7, validators=[hex_validator])
     option_5 = models.CharField(max_length=255)
-    color_5 = models.CharField(max_length=7, validators=[hex_validator])
 
     def __str__(self):
         return f"Likert Q{self.order} for Form {self.course_form.id}: {self.question}"

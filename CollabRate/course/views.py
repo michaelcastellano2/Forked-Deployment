@@ -80,10 +80,16 @@ def create_form(request, join_code):
         )
         course_form.save()
 
-        # return render(request, 'course/create_form_questions', course=course, course_form=course_form)
-        return redirect('dashboard')
+        return redirect('draft_questions', join_code=join_code, course_form_id=course_form.pk)
     
     return render(request, 'course/manage_forms.html', {'course': course})
+
+@login_required
+def draft_questions(request, join_code, course_form_id):
+    course = get_object_or_404(Course, join_code=join_code)
+    course_form = get_object_or_404(CourseForm, pk=course_form_id)
+
+    return render(request, 'course/draft_questions.html', {'course': course, 'course_form': course_form})
 
 @login_required
 def view_forms(request, join_code):

@@ -1,0 +1,164 @@
+{% extends 'collabrate/base.html' %}
+{% block title %}Draft Questions{% endblock %}
+{% load static %}
+{% load custom_tags %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'course/create_form_info.css' %}">
+<link rel="stylesheet" href="{% static 'course/course_landing.css' %}">
+<link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="d-flex">
+    <div class="d-flex">
+        {% include "course/sidenav.html" %}
+    </div>
+
+    <div class="container mt-4">
+
+        <!-- Page Title / Form Name -->
+        <div class="row">
+          <div class="col">
+            <h1 class="mb-3">{{ course_form.name }} - Draft Questions</h1>
+          </div>
+        </div>
+      
+        <!-- Start of the Form -->
+        <form method="POST" action="{% url 'draft_questions' join_code=course.join_code course_form_id=course_form.id %}">
+          {% csrf_token %}
+      
+          <!-- LIKERT QUESTIONS -->
+          {% if course_form.num_likert > 0 %}
+            {% for i in course_form.num_likert|times %}
+              <!-- Each Question Card -->
+              <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                  <!-- Question Number and Header -->
+                  <div class="d-flex align-items-center mb-2">
+                    <!-- Circle or Badge for question number -->
+                    <div class="me-3 text-white" 
+                         style="width: 30px; height: 30px; border-radius: 50%; background-color: #ff4e4e; display: flex; align-items: center; justify-content: center;">
+                      <strong>{{ forloop.counter }}</strong>
+                    </div>
+                    <div class="flex-grow-1">
+                      <input type="text" 
+                             name="likert_question_title_{{ i }}" 
+                             class="form-control" 
+                             placeholder="Enter Question"
+                             aria-label="Question Title">
+                    </div>
+                  </div>
+      
+                  <!-- Radio Buttons Row -->
+                  <div class="row row-cols-1 row-cols-sm-5 mt-3 text-center">
+                    <!-- Typically you'd store and retrieve the user’s actual question text/answers in the database; 
+                         but for drafting, you can simply show placeholders or handle it in POST. -->
+      
+                    <div class="col mb-2">
+                      <!-- You can add a pencil icon next to the label if desired. -->
+                      <input type="radio" 
+                             name="likert_response_{{ i }}" 
+                             id="likert_{{ i }}_strongly_disagree" 
+                             value="Strongly Disagree" />
+                      <label for="likert_{{ i }}_strongly_disagree" class="ms-1">
+                        Strongly Disagree
+                        <i class="fa fa-pencil ms-1" aria-hidden="true"></i>
+                      </label>
+                    </div>
+      
+                    <div class="col mb-2">
+                      <input type="radio" 
+                             name="likert_response_{{ i }}" 
+                             id="likert_{{ i }}_disagree" 
+                             value="Disagree" />
+                      <label for="likert_{{ i }}_disagree" class="ms-1">
+                        Disagree
+                        <i class="fa fa-pencil ms-1" aria-hidden="true"></i>
+                      </label>
+                    </div>
+      
+                    <div class="col mb-2">
+                      <input type="radio" 
+                             name="likert_response_{{ i }}" 
+                             id="likert_{{ i }}_neutral" 
+                             value="Neutral" />
+                      <label for="likert_{{ i }}_neutral" class="ms-1">
+                        Neutral
+                        <i class="fa fa-pencil ms-1" aria-hidden="true"></i>
+                      </label>
+                    </div>
+      
+                    <div class="col mb-2">
+                      <input type="radio" 
+                             name="likert_response_{{ i }}" 
+                             id="likert_{{ i }}_agree" 
+                             value="Agree" />
+                      <label for="likert_{{ i }}_agree" class="ms-1">
+                        Agree
+                        <i class="fa fa-pencil ms-1" aria-hidden="true"></i>
+                      </label>
+                    </div>
+      
+                    <div class="col mb-2">
+                      <input type="radio" 
+                             name="likert_response_{{ i }}" 
+                             id="likert_{{ i }}_strongly_agree" 
+                             value="Strongly Agree" />
+                      <label for="likert_{{ i }}_strongly_agree" class="ms-1">
+                        Strongly Agree
+                        <i class="fa fa-pencil ms-1" aria-hidden="true"></i>
+                      </label>
+                    </div>
+      
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+      
+          <!-- OPEN-ENDED QUESTIONS -->
+          {% if course_form.num_open_ended > 0 %}
+            {% for i in course_form.num_open_ended|times %}
+              <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                  <!-- Question Number and Header -->
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="me-3 text-white" 
+                         style="width: 30px; height: 30px; border-radius: 50%; background-color: #ff4e4e; display: flex; align-items: center; justify-content: center;">
+                      <!-- Notice: for Likert + open ended in the same loop, you might want 
+                           to continue the numbering across question types. If so, adapt accordingly. -->
+                      <strong>{{ forloop.counter }}</strong>
+                    </div>
+                    <div class="flex-grow-1">
+                      <input type="text" 
+                             name="open_ended_question_title_{{ i }}" 
+                             class="form-control" 
+                             placeholder="Enter Question"
+                             aria-label="Question Title">
+                    </div>
+                  </div>
+      
+                  <!-- Open-Ended Textarea -->
+                  <textarea class="form-control mt-3" 
+                            name="open_ended_question_response_{{ i }}" 
+                            rows="3"
+                            placeholder="Write your answer here..."></textarea>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+      
+          <!-- PUBLISH BUTTON -->
+          <div class="text-end mt-4">
+            <button type="submit" class="btn btn-primary px-4 py-2" style="font-weight: 500;">
+              Publish <span class="ms-1">&#x25BC;</span>
+            </button>
+          </div>
+      
+        </form>
+    </div>
+
+
+</div>
+{% endblock %}
