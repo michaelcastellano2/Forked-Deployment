@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from dashboard.models import Course
 from accounts.models import CustomUser
-from .models import CourseForm, Team
+from .models import CourseForm, Team, Likert, OpenEndedQuestion
+from django.http import HttpResponseRedirect
 
 @login_required
 def course_detail(request, join_code):
@@ -60,6 +61,7 @@ def create_team(request, join_code):
 @login_required
 def create_form(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
+    forms = CourseForm.objects.filter(course=course)
 
     # Default color values
     default_colors = {
@@ -106,26 +108,92 @@ def create_form(request, join_code):
     # Pass the default color values to the template
     return render(request, 'course/manage_forms.html', {
         'course': course,
-        'default_colors': default_colors
+        'default_colors': default_colors,
+        'forms': forms
     })
-
 
 @login_required
 def draft_questions(request, join_code, course_form_id):
     course = get_object_or_404(Course, join_code=join_code)
     course_form = get_object_or_404(CourseForm, pk=course_form_id)
+    forms = CourseForm.objects.filter(course=course)
 
-    return render(request, 'course/draft_questions.html', {'course': course, 'course_form': course_form})
+    if request.method == "POST":
+        if request.POST.get('action') == 'add_likert':
+            course_form.num_likert += 1
+            course_form.save()
+
+            return HttpResponseRedirect(f'{request.path}?join_code={join_code}&course_form_id={course_form.id}&forms={forms}#last-likert')
+
+        if request.POST.get('action') == 'add_open':
+            course_form.num_open_ended += 1
+            course_form.save()
+            
+            return HttpResponseRedirect(f'{request.path}?join_code={join_code}&course_form_id={course_form.id}&forms={forms}#last-open')
+
+        if request.POST.get('action') == 'save':
+
+            
+
+            for likert in course_form.likert_questions.all():
+                q_key = f"likert_{likert.id}_question"
+                o1_key = f"likert_{likert.id}_option_1"
+                o2_key = f"likert_{likert.id}_option_2"
+                o3_key = f"likert_{likert.id}_option_3"
+                o4_key = f"likert_{likert.id}_option_4"
+                o5_key = f"likert_{likert.id}_option_5"
+
+                likert.question = request.POST.get(q_key, likert.question)
+                likert.option_1 = request.POST.get(o1_key, likert.option_1)
+                likert.option_2 = request.POST.get(o2_key, likert.option_2)
+                likert.option_3 = request.POST.get(o3_key, likert.option_3)
+                likert.option_4 = request.POST.get(o4_key, likert.option_4)
+                likert.option_5 = request.POST.get(o5_key, likert.option_5)
+                likert.save()
+
+            for open_q in course_form.open_ended_questions.all():
+                key = f"open_{open_q.id}_question"
+                open_q.question = request.POST.get(key, open_q.question)
+                open_q.save()
+
+            num_likert = int(request.POST.get('num_likert', 0))
+
+            print("=== DEBUG: Likert Questions ===")
+            for i in range(num_likert):
+                title_key = f'likert_question_title_{i}'
+                label_keys = [f'likert_{i}_label_{j}' for j in range(1, 6)]
+
+                question_text = request.POST.get(title_key)
+                labels = [request.POST.get(k) for k in label_keys]
+
+                print(f"Likert Question {i+1}: {question_text}")
+                for idx, label in enumerate(labels):
+                    print(f"  Option {idx+1}: {label}")
+            print("=== END ===")
+
+            course_form.save()
+            return redirect('course_detail', join_code=join_code)
+
+        if request.POST.get('action') == 'publish':
+            course_form.state = 'published'
+            course_form.save()
+            return redirect('course_detail', join_code=join_code)
+        
+        if request.POST.get('action') == 'release':
+            course_form.state = 'released'
+            course_form.save()
+            return redirect('course_detail', join_code=join_code)
+
+
+    return render(request, 'course/draft_questions.html', {'course': course, 'course_form': course_form, 'forms': forms})
 
 @login_required
 def view_forms(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
-    forms = CourseForm.objects.filter(course=course)  
 
     return render(request, "course/view_forms.html", {
         "join_code": join_code,
         "course": course,
-        "forms": forms,  
     })
 
 @login_required

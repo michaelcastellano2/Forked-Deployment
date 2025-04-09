@@ -4,6 +4,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from dashboard.models import Course
 from accounts.models import CustomUser
+from datetime import date
 
 hex_validator = RegexValidator(
     regex=r'^#(?:[0-9a-fA-F]{3}){1,2}$',
@@ -11,9 +12,20 @@ hex_validator = RegexValidator(
 )
 
 class CourseForm(models.Model):
+
+    DRAFT = 'draft'
+    PUBLISHED = 'published'
+    RELEASED = 'released'
+    
+    FORM_STATE_CHOICES = [
+        (DRAFT, 'Draft'),
+        (PUBLISHED, 'Published'),
+        (RELEASED, 'Released'),
+    ]
+
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="course_forms")
     name = models.CharField(max_length=255, default="Untitled Form")
-    due_date = models.DateField(null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True, default=date.today)
     due_time = models.TimeField(null=True, blank=True)
     num_likert = models.PositiveIntegerField(default=3)
     num_open_ended = models.PositiveIntegerField(default=1)
@@ -25,7 +37,11 @@ class CourseForm(models.Model):
     color_3 = models.CharField(max_length=7, validators=[hex_validator], default="#F2F0EF")
     color_4 = models.CharField(max_length=7, validators=[hex_validator], default="#3D5A80")
     color_5 = models.CharField(max_length=7, validators=[hex_validator], default="#293241")
-
+    state = models.CharField(
+        max_length=9,
+        choices=FORM_STATE_CHOICES,
+        default=DRAFT, 
+    )
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

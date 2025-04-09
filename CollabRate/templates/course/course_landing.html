@@ -56,7 +56,7 @@
             <button><a href="{% url 'create_form' course.join_code %}">Create Form</a></button>
             <form method="POST" action="{% url 'clear_course_forms' course.join_code %}">
                 {% csrf_token %}
-                <button type="submit">Clear Course Forms (DEBUG)</button>
+                <button type="submit">Clear Course Forms (TESTING PURPOSES)</button>
             </form>
 
         </div>
