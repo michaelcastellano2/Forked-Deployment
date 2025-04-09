@@ -8,7 +8,10 @@ urlpatterns = [
     path('<str:join_code>/group/create/', views.create_team, name='create_team'),
 
     path('<str:join_code>/form/create/', views.create_form, name='create_form'),
-    path('<str:join_code>/form/questions/<int:form_id>/', views.draft_form_questions, name='draft_form_questions'),
+
+
+    
+    # path('<str:join_code>/form/questions/<int:course_form_id>/', views.create_form_questions, name='create_form_questions'),
 
     
     # path('<str:join_code>/form/draft/<int:form_id>/', views.create_form_info, name='create_form_info'),

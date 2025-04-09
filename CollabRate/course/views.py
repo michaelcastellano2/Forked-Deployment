@@ -80,58 +80,10 @@ def create_form(request, join_code):
         )
         course_form.save()
 
-        return redirect('draft_form_questions', join_code=course.join_code, course_form_id=course_form.pk)
+        # return render(request, 'course/create_form_questions', course=course, course_form=course_form)
+        return redirect('dashboard')
     
-    return render(request, 'course/form.html', {'course': course})
-
-@login_required
-def draft_form_questions(request, join_code, course_form_id):
-    return render(request, 'course')
-
-
-# @login_required
-# def create_form_info(request, join_code, form_id):
-#     course = Course.objects.get(join_code=join_code)
-#     form = CourseForm.objects.get(form_id=form_id)
-
-#     if request.method == 'POST':
-#         return redirect('create_form_questions', 
-#             join_code=course.join_code,
-#             form=form)
-    
-#     return render(request, 'course/create_form_info.html', {'course': course, 'form_id': form_id})
-
-# @login_required
-# def create_form_questions(request, join_code, form_id):
-#     course = get_object_or_404(Course, join_code=join_code)
-#     form = get_object_or_404(CourseForm, pk=form_id)
-
-#     if request.method == "POST":
-
-#         form_name = request.POST.get('form_name', '')
-#         due_date = request.POST.get('due_date', '')
-#         due_time = request.POST.get('due_time', '')
-#         self_evaluate = 'self_evaluate' in request.POST
-#         num_likert = int(request.POST.get('num_likert', 3))
-#         num_open_ended = int(request.POST.get('num_open_ended', 1))
-
-#         form.name = form_name
-#         form.due_date = due_date
-#         form.due_time = due_time
-#         form.self_evaluate = self_evaluate
-#         form.num_likert = num_likert
-#         form.num_open_ended = num_open_ended
-#         form.course = course 
-
-#         form.save()
-
-#     return render(request, 'course/create_form_questions.html', {
-#         'join_code': join_code,
-#         'form_id': form_id,
-#         'range_likert': range(form.num_likert),
-#         'range_open': range(form.num_open_ended),
-#         'course': course
-#     })
+    return render(request, 'course/manage_forms.html', {'course': course})
 
 @login_required
 def view_forms(request, join_code):
