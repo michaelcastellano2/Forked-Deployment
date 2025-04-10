@@ -62,7 +62,7 @@ class Likert(models.Model):
     def __str__(self):
         return f"Likert Q{self.order} for Form {self.course_form.id}: {self.question}"
     
-class OpenEndedQuestion(models.Model):
+class OpenEnded(models.Model):
     course_form = models.ForeignKey(CourseForm, on_delete=models.CASCADE, related_name="open_ended_questions")
     question = models.TextField()
     order = models.IntegerField()
@@ -90,7 +90,7 @@ class OpenEndedResponse(models.Model):
         limit_choices_to={'user_type': CustomUser.STUDENT},
         related_name="open_ended_responses"
     )
-    open_ended = models.ForeignKey(OpenEndedQuestion, on_delete=models.CASCADE, related_name="responses")
+    open_ended = models.ForeignKey(OpenEnded, on_delete=models.CASCADE, related_name="responses")
     answer = models.TextField()
 
     def __str__(self):

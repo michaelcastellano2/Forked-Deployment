@@ -54,7 +54,7 @@
         
         <div class="list-group">
             {% for form in forms %}
-                <a href="{% url 'draft_questions' join_code=course.join_code course_form_id=form.id %}" class="list-group-item 
+                <a href="{% url 'edit_info' join_code=course.join_code course_form_id=form.id %}" class="list-group-item 
                     {% if form.state == 'draft' %}draft{% elif form.state == 'published' %}published{% elif form.state == 'released' %}released{% endif %}">
                     <div class="card-body">
                         <h5 class="card-title">{{ form.name }}</h5>

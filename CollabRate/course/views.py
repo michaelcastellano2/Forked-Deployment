@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from dashboard.models import Course
 from accounts.models import CustomUser
-from .models import CourseForm, Team, Likert, OpenEndedQuestion
+from .models import CourseForm, Team, Likert, OpenEnded
 from django.http import HttpResponseRedirect
 
 @login_required
@@ -113,79 +113,129 @@ def create_form(request, join_code):
     })
 
 @login_required
-def draft_questions(request, join_code, course_form_id):
+def edit_info(request, join_code, course_form_id):
     course = get_object_or_404(Course, join_code=join_code)
     course_form = get_object_or_404(CourseForm, pk=course_form_id)
     forms = CourseForm.objects.filter(course=course)
+
+    default_colors = {
+        'color_1': "#872729",  # default color 1
+        'color_2': "#C44B4B",  # default color 2
+        'color_3': "#F2F0EF",  # default color 3
+        'color_4': "#3D5A80",  # default color 4
+        'color_5': "#293241",  # default color 5
+    }
+
+    if request.method == "POST":
+        modified_num_likert = int(request.POST.get("num_likert", course_form.num_likert))
+        if modified_num_likert < course_form.num_likert:
+            Likert.objects.filter(course_form=course_form, order__gte=modified_num_likert).delete()
+        
+        modified_num_open_ended = int(request.POST.get("num_open_ended", course_form.num_open_ended))
+        if modified_num_open_ended < course_form.num_open_ended:
+            OpenEnded.objects.filter(course_form=course_form, order__gte=modified_num_open_ended).delete()
+        
+        course_form.name = request.POST.get("form_name", course_form.name)
+        course_form.self_evaluate = "self_evaluate" in request.POST
+        course_form.num_likert = modified_num_likert
+        course_form.num_open_ended = modified_num_open_ended
+        course_form.due_date = request.POST.get("due_date", course_form.due_date)
+        course_form.due_time = request.POST.get("due_time", course_form.due_time)
+        course_form.color_1 = request.POST.get("color_1", course_form.color_1)
+        course_form.color_2 = request.POST.get("color_2", course_form.color_2)
+        course_form.color_3 = request.POST.get("color_3", course_form.color_3)
+        course_form.color_4 = request.POST.get("color_4", course_form.color_4)
+        course_form.color_5 = request.POST.get("color_5", course_form.color_5)
+        course_form.save()
+
+        return redirect('draft_questions', join_code=join_code, course_form_id=course_form.pk)
+    
+    return render(request, 'course/manage_forms.html', {
+        'course': course,
+        'default_colors': default_colors,
+        'forms': forms,
+        'course_form': course_form,
+    })
+
+@login_required
+def draft_questions(request, join_code, course_form_id):
+    course = get_object_or_404(Course, join_code=join_code)
+    course_form = get_object_or_404(CourseForm, pk=course_form_id)
+    course_forms = CourseForm.objects.filter(course=course)
+
+    likert_qs = list(course_form.likert_questions.all().order_by('order'))
+    open_ended_qs = list(course_form.open_ended_questions.all().order_by('order'))
 
     if request.method == "POST":
         if request.POST.get('action') == 'add_likert':
             course_form.num_likert += 1
             course_form.save()
 
-            return HttpResponseRedirect(f'{request.path}?join_code={join_code}&course_form_id={course_form.id}&forms={forms}#last-likert')
+            scroll_target = "scroll-likert"
+            return HttpResponseRedirect(f'{request.path}#{scroll_target}')
 
-        if request.POST.get('action') == 'add_open':
+        elif request.POST.get('action') == 'add_open_ended':
             course_form.num_open_ended += 1
             course_form.save()
             
-            return HttpResponseRedirect(f'{request.path}?join_code={join_code}&course_form_id={course_form.id}&forms={forms}#last-open')
+            scroll_target = "scroll-open-ended"
+            return HttpResponseRedirect(f'{request.path}#{scroll_target}')
 
-        if request.POST.get('action') == 'save':
+        elif request.POST.get('action') == 'save':
+            course_form.likert_questions.all().delete()
+            course_form.open_ended_questions.all().delete()
 
-            
-
-            for likert in course_form.likert_questions.all():
-                q_key = f"likert_{likert.id}_question"
-                o1_key = f"likert_{likert.id}_option_1"
-                o2_key = f"likert_{likert.id}_option_2"
-                o3_key = f"likert_{likert.id}_option_3"
-                o4_key = f"likert_{likert.id}_option_4"
-                o5_key = f"likert_{likert.id}_option_5"
-
-                likert.question = request.POST.get(q_key, likert.question)
-                likert.option_1 = request.POST.get(o1_key, likert.option_1)
-                likert.option_2 = request.POST.get(o2_key, likert.option_2)
-                likert.option_3 = request.POST.get(o3_key, likert.option_3)
-                likert.option_4 = request.POST.get(o4_key, likert.option_4)
-                likert.option_5 = request.POST.get(o5_key, likert.option_5)
-                likert.save()
-
-            for open_q in course_form.open_ended_questions.all():
-                key = f"open_{open_q.id}_question"
-                open_q.question = request.POST.get(key, open_q.question)
-                open_q.save()
-
-            num_likert = int(request.POST.get('num_likert', 0))
-
-            print("=== DEBUG: Likert Questions ===")
+            num_likert = course_form.num_likert
             for i in range(num_likert):
-                title_key = f'likert_question_title_{i}'
-                label_keys = [f'likert_{i}_label_{j}' for j in range(1, 6)]
+                question = request.POST.get(f"likert_question_{i}", "").strip()
+                option_1 = request.POST.get(f"likert_{i}_label_1", "Strongly Disagree").strip()
+                option_2 = request.POST.get(f"likert_{i}_label_2", "Disagree").strip()
+                option_3 = request.POST.get(f"likert_{i}_label_3", "Neutral").strip()
+                option_4 = request.POST.get(f"likert_{i}_label_4", "Agree").strip()
+                option_5 = request.POST.get(f"likert_{i}_label_5", "Strongly Agree").strip()
 
-                question_text = request.POST.get(title_key)
-                labels = [request.POST.get(k) for k in label_keys]
-
-                print(f"Likert Question {i+1}: {question_text}")
-                for idx, label in enumerate(labels):
-                    print(f"  Option {idx+1}: {label}")
-            print("=== END ===")
+                Likert.objects.create(
+                    course_form=course_form,
+                    question=question,
+                    order=i,
+                    option_1=option_1,
+                    option_2=option_2,
+                    option_3=option_3,
+                    option_4=option_4,
+                    option_5=option_5,
+                )
+            
+            num_open_ended = course_form.num_open_ended
+            for i in range(num_open_ended):
+                question = request.POST.get(f"open_ended_question_{i}", "").strip()
+                OpenEnded.objects.create(
+                    course_form=course_form,
+                    question=question,
+                    order=i,    
+                )
 
             course_form.save()
-            return redirect('course_detail', join_code=join_code)
-
-        if request.POST.get('action') == 'publish':
+            scroll_target = "scroll-save"
+            return HttpResponseRedirect(f"{request.path}#{scroll_target}")
+        
+        elif request.POST.get('action') == 'publish':
             course_form.state = 'published'
             course_form.save()
             return redirect('course_detail', join_code=join_code)
         
-        if request.POST.get('action') == 'release':
+        elif request.POST.get('action') == 'release':
             course_form.state = 'released'
             course_form.save()
             return redirect('course_detail', join_code=join_code)
 
-
-    return render(request, 'course/draft_questions.html', {'course': course, 'course_form': course_form, 'forms': forms})
+    context = {
+        'course': course,
+        'course_form': course_form,
+        'forms': course_forms,
+        'likert_qs': likert_qs,
+        'open_ended_qs': open_ended_qs,
+    }
+    return render(request, 'course/draft_questions.html', context)
 
 @login_required
 def view_forms(request, join_code):
