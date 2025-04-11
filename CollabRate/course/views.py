@@ -5,6 +5,7 @@ from django.http import HttpResponseForbidden
 from dashboard.models import Course
 from accounts.models import CustomUser
 from .models import CourseForm, Team, Likert, OpenEnded
+from .helper import *
 from django.http import HttpResponseRedirect
 
 @login_required
@@ -167,63 +168,73 @@ def draft_questions(request, join_code, course_form_id):
     open_ended_qs = list(course_form.open_ended_questions.all().order_by('order'))
 
     if request.method == "POST":
-        if request.POST.get('action') == 'add_likert':
+        action = request.POST.get('action')
+
+        if action == 'add_likert':
+            rebuild_likert_questions(request, course_form)
             course_form.num_likert += 1
             course_form.save()
 
             scroll_target = "scroll-likert"
             return HttpResponseRedirect(f'{request.path}#{scroll_target}')
+        
+        elif action.startswith('delete_likert_'):
+            try:
+                delete_index = int(action.split("_")[2])
+            except (ValueError, TypeError):
+                delete_index = -1
+            
+            if delete_index >= 0:
+                Likert.objects.filter(course_form=course_form, order=delete_index).delete()
 
-        elif request.POST.get('action') == 'add_open_ended':
+                course_form.num_likert -= 1
+                course_form.save()
+
+                for lk in Likert.objects.filter(course_form=course_form).order_by('order'):
+                    if lk.order > delete_index:
+                        lk.order -= 1
+                        lk.save()
+            
+            return HttpResponseRedirect(request.path)
+        
+        elif action == 'add_open_ended':
+            rebuild_open_ended_questions(request, course_form)
             course_form.num_open_ended += 1
             course_form.save()
             
             scroll_target = "scroll-open-ended"
-            return HttpResponseRedirect(f'{request.path}#{scroll_target}')
+            return HttpResponseRedirect(f"{request.path}#{scroll_target}")
+        
+        elif action.startswith('delete_open_ended_'):
+            try:
+                delete_index = int(action.split("_")[3])
+            except (ValueError, TypeError):
+                delete_index = -1
 
-        elif request.POST.get('action') == 'save':
-            course_form.likert_questions.all().delete()
-            course_form.open_ended_questions.all().delete()
+            if delete_index >= 0:
+                OpenEnded.objects.filter(course_form=course_form, order=delete_index).delete()
 
-            num_likert = course_form.num_likert
-            for i in range(num_likert):
-                question = request.POST.get(f"likert_question_{i}", "").strip()
-                option_1 = request.POST.get(f"likert_{i}_label_1", "Strongly Disagree").strip()
-                option_2 = request.POST.get(f"likert_{i}_label_2", "Disagree").strip()
-                option_3 = request.POST.get(f"likert_{i}_label_3", "Neutral").strip()
-                option_4 = request.POST.get(f"likert_{i}_label_4", "Agree").strip()
-                option_5 = request.POST.get(f"likert_{i}_label_5", "Strongly Agree").strip()
+                course_form.num_open_ended -= 1
+                course_form.save()
 
-                Likert.objects.create(
-                    course_form=course_form,
-                    question=question,
-                    order=i,
-                    option_1=option_1,
-                    option_2=option_2,
-                    option_3=option_3,
-                    option_4=option_4,
-                    option_5=option_5,
-                )
+                for oe in OpenEnded.objects.filter(course_form=course_form).order_by('order'):
+                    if oe.order > delete_index:
+                        oe.order -= 1
+                        oe.save()
             
-            num_open_ended = course_form.num_open_ended
-            for i in range(num_open_ended):
-                question = request.POST.get(f"open_ended_question_{i}", "").strip()
-                OpenEnded.objects.create(
-                    course_form=course_form,
-                    question=question,
-                    order=i,    
-                )
+            return HttpResponseRedirect(request.path)
 
-            course_form.save()
+        elif action == 'save':
+            rebuild_all_questions(request, course_form)
             scroll_target = "scroll-save"
             return HttpResponseRedirect(f"{request.path}#{scroll_target}")
         
-        elif request.POST.get('action') == 'publish':
+        elif action == 'publish':
             course_form.state = 'published'
             course_form.save()
             return redirect('course_detail', join_code=join_code)
         
-        elif request.POST.get('action') == 'release':
+        elif action == 'release':
             course_form.state = 'released'
             course_form.save()
             return redirect('course_detail', join_code=join_code)

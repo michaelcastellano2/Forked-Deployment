@@ -65,6 +65,16 @@
                                 <input type="text" name="likert_question_{{ i }}" class="form-control"
                                     placeholder="Enter Question" aria-label="Question Title" value="{% if current_likert %}{{ current_likert.question }}{% endif %}">
                             </div>
+
+                            <div>
+                                <!-- Delete button with combined action and index -->
+                                <button type="submit" name="action" 
+                                    value="delete_likert_{{ forloop.counter0 }}"
+                                    class="btn btn-danger btn-sm"
+                                    style="margin-left: auto;">
+                                    &times;
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Likert Options -->
@@ -132,6 +142,15 @@
                                             aria-label="Question Title"
                                             value="{% if current_open_ended %}{{ current_open_ended.question }}{% endif %}">
                                     </div>
+                                    <div>
+                                        <!-- Delete button with combined action and index -->
+                                        <button type="submit" name="action" 
+                                            value="delete_open_ended_{{ forloop.counter0 }}"
+                                            class="btn btn-danger btn-sm"
+                                            style="margin-left: auto;">
+                                            &times;
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -184,11 +203,12 @@
 {% block script %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // Scroll to hash if present
         var hash = window.location.hash;
         if (hash) {
             var targetElement = document.querySelector(hash);
             if (targetElement) {
-                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start'});
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
     });
