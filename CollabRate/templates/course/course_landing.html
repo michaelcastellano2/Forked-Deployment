@@ -17,28 +17,19 @@
             <div class="course-header" style="background-color: {{ course.color }};"><b>{{ course.code }}</b> | {{ course.title }}</div>
 
             <h1 class="section-title">To Do</h1>
-            <div class="card">
-                <div class="info">
-                    <p>Delivery 2</p>
-                    <small>Due 2/24 at 3:00 pm</small>
-                </div>
-                <span class="dot red"></span>
-            </div>
-            <div class="card">
-                <div class="info">
-                    <p>Delivery 3</p>
-                    <small>Due 2/24 at 3:00 pm</small>
-                </div>
-                <span class="dot red"></span>
-            </div>
-            <div class="card">
-                <div class="info">
-                    <p>Delivery 3</p>
-                    <small>Due 2/24 at 3:00 pm</small>
-                </div>
-                <span class="dot red"></span>
-            </div>
-
+            {% if forms %}
+                {% for form in forms %}
+                    <div class="card">
+                        <div class="info">
+                            <p>{{form.name}}</p>
+                            <small>Due {{ form.due_date|date:"M d" }} at {{ form.due_time|time:"g:i a" }}</small>
+                        </div>
+                        <span class="dot red"></span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No forms assigned to your team.</p>
+            {% endif %}
             <h1 class="section-title">View Feedback</h1>
             <div class="card">
                 <div class="info">
