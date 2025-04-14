@@ -19,5 +19,7 @@ urlpatterns = [
     path('<str:join_code>/form/view/', views.view_forms, name='view_forms'),
     path('<str:join_code>/form/delete/<int:form_id>/', views.delete_form, name='delete_form'),
     path('<str:join_code>/form/edit/<int:form_id>/', views.edit_form, name='edit_form'),
-    path('course/<str:join_code>/clear/', views.clear_course_forms, name='clear_course_forms'),
+    path('<str:join_code>/', views.course_detail, name='course_detail'),
+    path('course/<str:join_code>/clear/', views.clear_course_forms, name='clear_course_forms')
+
 ]

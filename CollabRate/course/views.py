@@ -303,3 +303,13 @@ def clear_course_forms(request, join_code):
         messages.error(request, 'Course not found.')
 
     return redirect('course_detail', join_code=join_code)
+
+# course/views.py
+from django.shortcuts import render, get_object_or_404
+from dashboard.models import Course  # or wherever your Course model is
+
+def course_detail(request, join_code):
+    course = get_object_or_404(Course, join_code=join_code)
+    return render(request, 'course/course_landing.html', {
+        'course': course
+    })
