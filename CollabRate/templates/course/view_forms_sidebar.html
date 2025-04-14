@@ -56,7 +56,7 @@
             <a href="{% url 'create_form' join_code=course.join_code %}" class="list-group-item">
                 <div class="card-body">
                     <h5 class="card-title">{{ form.name }}</h5>
-                    <p class="card-text">Due: {{ form.due_date|date:"F j, Y" }} at {{ form.due_time|date:"H:i" }}</p>
+                    <p class="card-text">Create New Form</p>
                 </div>
             </a>
             {% for form in forms %}
