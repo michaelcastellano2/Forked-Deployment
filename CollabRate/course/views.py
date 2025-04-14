@@ -11,7 +11,16 @@ from django.http import HttpResponseRedirect
 @login_required
 def course_detail(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
-    return render(request, 'course/course_landing.html', {'course': course})
+    teams = Team.objects.filter(course=course,students=request.user)
+    forms = CourseForm.objects.filter(
+        course=course,
+        teams__in=teams
+    ).distinct()
+
+    return render(request, 'course/course_landing.html', {
+        'course': course,
+        'forms' : forms,
+        })
 
 @login_required
 def groups(request, join_code):
