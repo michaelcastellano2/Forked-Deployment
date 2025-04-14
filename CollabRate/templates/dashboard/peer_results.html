@@ -34,13 +34,15 @@
 
         {% if feedback_list %}
         <div class="feedback-scroll mx-auto">
+        "
             {% for item in feedback_list %}
-                <p>"{{ item.answer }}"</p>
+                {{ item }}.
             {% endfor %}
+            "
         </div>
         {% else %}
         <p class="no-feedback text-center">No feedback available yet.</p>
         {% endif %}
-    </div>
+    </div>  
 </div>
 {% endblock %}
