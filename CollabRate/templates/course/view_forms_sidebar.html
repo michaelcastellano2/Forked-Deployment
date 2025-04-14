@@ -1,0 +1,75 @@
+{% load static %}
+
+{% block head %}
+<style>
+    a {
+        text-decoration: none;       
+        outline: none;
+    }
+
+    a:hover, a:focus, a:active {
+        text-decoration: none; 
+    }
+
+    .list-group-item {
+        border: 1px solid black;
+        border-radius: .25rem;
+        margin-bottom: 15px;
+        padding: 20px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform .2s ease-in-out;
+    }
+
+    .list-group-item:hover {
+        transform: scale(1.05);
+    }
+
+    .draft {
+        background-color: grey;
+    }
+
+    .published {
+        background-color: #FFD464;
+    }
+
+    .released {
+        background-color: #AFE1AF;
+        color: black; 
+    }
+
+    .card-text {
+        font-size: 14px;
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+<div class="d-flex flex-column vh-100 text-black" style="width: 100%; min-width: 250px; min-height: 100vh;">
+    <div class="p-3">
+        <h1>{{ course.name }} Forms</h1>  
+        
+        <div class="list-group">
+            <a href="{% url 'create_form' join_code=course.join_code %}" class="list-group-item">
+                <div class="card-body">
+                    <h5 class="card-title">{{ form.name }}</h5>
+                    <p class="card-text">Create New Form</p>
+                </div>
+            </a>
+            {% for form in forms %}
+                <a href="{% url 'edit_info' join_code=course.join_code course_form_id=form.id %}" class="list-group-item 
+                    {% if form.state == 'draft' %}draft{% elif form.state == 'published' %}published{% elif form.state == 'released' %}released{% endif %}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ form.name }}</h5>
+                        <p class="card-text">Due: {{ form.due_date|date:"F j, Y" }} at {{ form.due_time|date:"H:i" }}</p>
+                    </div>
+                </a>
+            {% empty %}
+                <p>No forms available for this course.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
