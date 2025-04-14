@@ -4,6 +4,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from dashboard.models import Course
 from accounts.models import CustomUser
+from datetime import date
 
 hex_validator = RegexValidator(
     regex=r'^#(?:[0-9a-fA-F]{3}){1,2}$',
@@ -11,15 +12,36 @@ hex_validator = RegexValidator(
 )
 
 class CourseForm(models.Model):
+
+    DRAFT = 'draft'
+    PUBLISHED = 'published'
+    RELEASED = 'released'
+    
+    FORM_STATE_CHOICES = [
+        (DRAFT, 'Draft'),
+        (PUBLISHED, 'Published'),
+        (RELEASED, 'Released'),
+    ]
+
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="course_forms")
     name = models.CharField(max_length=255, default="Untitled Form")
-    due_date = models.DateField(null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True, default=date.today)
     due_time = models.TimeField(null=True, blank=True)
     num_likert = models.PositiveIntegerField(default=3)
     num_open_ended = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     self_evaluate = models.BooleanField(default=False)
     teams = models.ManyToManyField('Team', related_name="course_forms", blank=True)
+    color_1 = models.CharField(max_length=7, validators=[hex_validator], default="#872729")
+    color_2 = models.CharField(max_length=7, validators=[hex_validator], default="#C44B4B")
+    color_3 = models.CharField(max_length=7, validators=[hex_validator], default="#F2F0EF")
+    color_4 = models.CharField(max_length=7, validators=[hex_validator], default="#3D5A80")
+    color_5 = models.CharField(max_length=7, validators=[hex_validator], default="#293241")
+    state = models.CharField(
+        max_length=9,
+        choices=FORM_STATE_CHOICES,
+        default=DRAFT, 
+    )
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -32,20 +54,15 @@ class Likert(models.Model):
     question = models.TextField()
     order = models.IntegerField()
     option_1 = models.CharField(max_length=255)
-    color_1 = models.CharField(max_length=7, validators=[hex_validator])
     option_2 = models.CharField(max_length=255)
-    color_2 = models.CharField(max_length=7, validators=[hex_validator])
     option_3 = models.CharField(max_length=255)
-    color_3 = models.CharField(max_length=7, validators=[hex_validator])
     option_4 = models.CharField(max_length=255)
-    color_4 = models.CharField(max_length=7, validators=[hex_validator])
     option_5 = models.CharField(max_length=255)
-    color_5 = models.CharField(max_length=7, validators=[hex_validator])
 
     def __str__(self):
         return f"Likert Q{self.order} for Form {self.course_form.id}: {self.question}"
     
-class OpenEndedQuestion(models.Model):
+class OpenEnded(models.Model):
     course_form = models.ForeignKey(CourseForm, on_delete=models.CASCADE, related_name="open_ended_questions")
     question = models.TextField()
     order = models.IntegerField()
@@ -73,7 +90,7 @@ class OpenEndedResponse(models.Model):
         limit_choices_to={'user_type': CustomUser.STUDENT},
         related_name="open_ended_responses"
     )
-    open_ended = models.ForeignKey(OpenEndedQuestion, on_delete=models.CASCADE, related_name="responses")
+    open_ended = models.ForeignKey(OpenEnded, on_delete=models.CASCADE, related_name="responses")
     answer = models.TextField()
 
     def __str__(self):

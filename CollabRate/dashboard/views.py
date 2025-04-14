@@ -10,6 +10,12 @@ from .models import Course
 from .models import Course
 import json
 from django.http import HttpRequest
+from django.shortcuts import render, get_object_or_404
+from course.models import Course, CourseForm, Team, LikertResponse, OpenEndedResponse
+from django.shortcuts import render, get_object_or_404
+from course.models import CourseForm, LikertResponse, OpenEndedResponse, Team
+from dashboard.models import Course
+from accounts.models import CustomUser
 
 
 @login_required
@@ -150,17 +156,42 @@ def course_invite(request, join_code, token):
 
     return redirect('dashboard')
 
+def calculate_average_score(likert_responses):
+    if not likert_responses.exists():
+        return 0.0
+    
+    total = sum(resp.answer for resp in likert_responses)
+    return total / likert_responses.count()
 
 
+
+def calculate_average_score(likert_responses):
+    if not likert_responses.exists():
+        return 0.0
+    total = sum(resp.answer for resp in likert_responses)
+    return total / likert_responses.count()
 
 def peer_results(request, course_code, delivery_number):
-    # dummy data for now
+    course = get_object_or_404(Course, code=course_code)
+    form_name = f"Delivery {delivery_number}"
+    form = get_object_or_404(CourseForm, course=course, name=form_name)
+    student = request.user
+
+    team = Team.objects.get(students=student, course=course)
+
+    # Get all Likert and open-ended responses about this student for this form
+    likert_scores = LikertResponse.objects.filter(student=student, likert__course_form=form)
+    open_feedback = OpenEndedResponse.objects.filter(student=student, open_ended__course_form=form)
+
+    # Sort feedback alphabetically
+    sorted_feedback = sorted([resp.answer for resp in open_feedback])
+
+    score = calculate_average_score(likert_scores)
+
     context = {
-        'course_code': course_code,
-        'delivery': delivery_number,
-        'score': 9.6,
-        'feedback': """Good job presenting his part of the presentation. Worked well with others when putting together submission and slides.
-        Good time management, flexible with my scheduling conflicts, confident while speaking. Good teamwork/communication.
-        Very communicative. Will and I collaborated together on the functional requirements..."""
+        "course": course,
+        "form": form,
+        "score": round(score, 1),
+        "feedback_list": sorted_feedback,
     }
-    return render(request, 'dashboard/peer_results.html', context)
+    return render(request, "dashboard/peer_results.html", context)

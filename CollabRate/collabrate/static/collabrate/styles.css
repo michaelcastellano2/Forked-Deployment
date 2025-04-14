@@ -25,6 +25,11 @@ a:hover, a:focus, a:active {
     margin: 0;
     padding: 15px 20px;
     color: #F2F0EF;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
 }
 
 .navbar-left .logo {

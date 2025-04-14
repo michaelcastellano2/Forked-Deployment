@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="d-flex flex-column vh-100 bg-dark text-white" style="width: 15%; min-width: 250px; min-height: 100vh;">
+<div class="d-flex flex-column vh-100 text-white" style="width: 10%; min-width: 250px; min-height: 100vh; background-color: #212121;">
     <div class="color-bar mb-4">
         <div class="color1"></div>
         <div class="color2"></div>
@@ -10,44 +10,51 @@
     </div>
     <div class="p-3">
         <!-- Profile Name -->
-        <div class="d-flex align-items-center px-2 mb-3">
-            <i class="fas fa-user-circle fa-2x me-2"></i>
+        <div class="d-flex align-items-center px-2 mb-4">
+            <i class="fas fa-user-circle fa-2x me-3"></i>
             <span>{{ user.username|capfirst }} ({{ user.user_type|capfirst }})</span>
         </div>
 
-        <!-- Groups - UPDATED - NOW ROUTES TO CREATE_TEAMS -->
+        <!-- Professor Options -->
         {% if user.user_type == "professor" %}
         <!-- Groups -->
-        <div class="d-flex align-items-center px-2 mb-3">
+        <div class="d-flex align-items-center px-2 mb-4">
             <a href="{% url 'create_team' course.join_code %}"
                 class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
-                <i class="fa-solid fa-user-group fa-1-5x me-2"></i>
+                <i class="fa-solid fa-user-group fa-1-5x me-3"></i>
                 <span>Groups</span>
             </a>
         </div>
-        <div class="d-flex align-items-center px-2 mb-3">
+        <div class="d-flex align-items-center px-2 mb-4">
             <a href="{% url 'create_form' course.join_code %}"
                class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
-               <i class="fa-solid fa-plus fa-1-5x me-2"></i>
+               <i class="fa-solid fa-plus fa-1-5x me-3"></i>
                 <span>Create Form</span>
             </a>
         </div>
-        <div class="d-flex align-items-center px-2 mb-3">
+        <div class="d-flex align-items-center px-2 mb-4">
             <a href="{% url 'view_forms' course.join_code %}"
                class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
-               <i class="fa-solid fa-pencil fa-1-5x me-2"></i> 
+               <i class="fa-solid fa-pencil fa-1-5x me-3"></i> 
                 <span>View Forms</span>
             </a>
         </div>
-        {% else %}
         {% endif %}
         <!-- Return -->
-        <div class="d-flex align-items-center px-2 mb-3">
-            <a href="{% url 'dashboard' %}"
-               class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
-                <i class="fa-solid fa-rotate-left fa-1-5x me-2"></i>
-                <span>Return to Courses</span>
-            </a>
+        <div class="d-flex align-items-center px-2 mb-4">
+            {% if request.resolver_match.url_name == 'peer_results' %}
+                <a href="{% url 'course_detail' course.join_code %}"
+                class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
+                    <i class="fa-solid fa-rotate-left fa-1-5x me-3"></i>
+                    <span>Return to Dashboard</span>
+                </a>
+            {% else %}
+                <a href="{% url 'dashboard' %}"
+                class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
+                    <i class="fa-solid fa-rotate-left fa-1-5x me-3"></i>
+                    <span>Return to Courses</span>
+                </a>
+            {% endif %}
         </div>
     </div>
 </div>
