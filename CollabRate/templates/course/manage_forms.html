@@ -6,6 +6,9 @@
     <link rel="stylesheet" href="{% static 'course/manage_forms.css' %}">
     <link rel="stylesheet" href="{% static 'course/course_landing.css' %}">
     <link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
+    <!-- Link our new time picker slider CSS file -->
+    <link rel="stylesheet" href="{% static 'course/timepicker.css' %}">
+    
     <style>
         .color-select {
             display: flex;
@@ -22,9 +25,6 @@
             height: 30px;
             border: none;
             cursor: pointer;
-        }
-        .top-banner {
-            background-color: {{ course.color }}; 
         }
         .w-30 {
             width: 30%;
@@ -43,16 +43,117 @@
         {% include "course/sidenav.html" %}
 
         <div class="w-90 p-4 d-flex flex-column">
-            <div style="flex: 0 0  10%;">
-                <div class="top-banner">
+            <div style="flex: 0 0  8.5%;">
+                <div class="pb-3">
                     <h1>
-                        <strong>{{ course.code }} | </strong>{{ course.title }} 
-                        {% if course_form %}- Edit Form{% else %}- Create Form{% endif %}
-                    </h1> 
+                        {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> {% if course_form %}Edit Form{% else %}Create Form{% endif %}
+                    </h1>
                 </div>
+                <hr class="m-0" style="opacity: 100%;">
             </div>
-            <div class="d-flex flex-row" style="flex: 0 0 90%;">
-                <div class="w-70 p-4 me-5" style="overflow-y: auto; max-height: 75vh;">
+            <div class="d-flex flex-row" style="flex: 0 0 91.5%;">
+                <div class="w-70 p-4 me-5 custom-scroll" style="overflow-y: auto; max-height: 75vh; margin-top: 2.5vh;">
+                    <div class="content">
+                        <form method="post" action="{% if course_form %}{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}{% else %}{% url 'create_form' join_code=course.join_code %}{% endif %}">
+                            {% csrf_token %}
+                            <div class="title-edit-container m-5">
+                                <div class="title-input-wrapper">
+                                <input 
+                                    type="text" 
+                                    id="peerEvalTitle" 
+                                    class="title-input" 
+                                    placeholder="Untitled Peer Evaluation Form"
+                                    value="{% if course_form %}{{ course_form.name }}{% else %}{% endif %}">
+                                <i class="fa-solid fa-pencil pencil-icon" aria-hidden="true"></i>
+                                </div>
+                            </div>  
+                            <div class="additional-controls my-4 ps-5">
+                                <div class="additional-controls-gap form-check form-switch mb-3 d-flex align-items-center p-0">
+                                    <label class="toggle-switch">
+                                        <input 
+                                            type="checkbox" 
+                                            id="selfEvaluateToggle" 
+                                            name="self_evaluate" 
+                                            {% if course_form and course_form.self_evaluate %}checked{% endif %}
+                                        >
+                                        <div class="toggle-switch-background">
+                                        <div class="toggle-switch-handle"></div>
+                                        </div>
+                                    </label>
+                                    <label class="form-label" for="selfEvaluateToggle">
+                                        Require that Students Self-Evaluate
+                                    </label>
+                                </div>
+                              
+                                <!-- Likert Scale Questions Counter -->
+                                <div class="additional-controls-gap d-flex align-items-center mb-1">
+                                    <div class="quantity-counter d-flex align-items-center">
+                                        <!-- Decrement Button -->
+                                        <button type="button" class="circle-btn decrement-btn" onclick="decrementCounter('likertCounter')">
+                                            &minus;
+                                        </button>
+                                    
+                                        <!-- Display the quantity -->
+                                        <span id="likertCounter" class="mx-2 d-flex justify-content-center counter-ui">3</span>
+                                    
+                                        <!-- Increment Button -->
+                                        <button type="button" class="circle-btn increment-btn" onclick="incrementCounter('likertCounter')">
+                                            &plus;
+                                        </button>
+                                    </div>
+                                    <label class="form-label">
+                                        Likert Scale Questions
+                                    </label>
+                                </div>
+
+                                <!-- Open-Ended Questions Counter -->
+                                <div class="additional-controls-gap d-flex align-items-center mb-3">
+                                    <div class="quantity-counter d-flex align-items-center">
+                                        <!-- Decrement Button -->
+                                        <button type="button" class="circle-btn decrement-btn" onclick="decrementCounter('openEndedCounter')">
+                                            &minus;
+                                        </button>
+                                    
+                                        <!-- Display the quantity -->
+                                        <span id="openEndedCounter" class="mx-2 d-flex justify-content-center counter-ui">3</span>
+                                    
+                                        <!-- Increment Button -->
+                                        <button type="button" class="circle-btn increment-btn" onclick="incrementCounter('openEndedCounter')">
+                                            &plus;
+                                        </button>
+                                    </div>
+                                    <label class="form-label">
+                                        Open Ended Questions
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Time picker slider HTML inserted directly above progress-step-container -->
+                            <div class="d-flex my-4 ps-5">
+                                <div class="time-picker-container">
+                                    <div class="time-display" id="time-display">12:00</div>
+                                    <div id="am-pm-selector">AM</div>
+                                    <div class="sliders">
+                                        <input type="range" id="hour-slider" min="0" max="23" step="1" value="0" oninput="updateTime()">
+                                        <input type="range" id="minute-slider" min="0" max="55" step="5" value="0" oninput="updateTime()">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-step-container">
+                                <div class="progress-bars">
+                                <div class="progress-bar progress-bar-active"></div>
+                                <div class="progress-bar progress-bar-inactive"></div>
+                                </div>
+                                <div class="progress-step-row">
+                                <span class="progress-step-text">Page 1 of 2</span>
+                                <button type="submit" name="action" value="save" class="progress-step-arrow">
+                                    <i class="fa fa-arrow-right"></i>
+                                </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                     <div class="form-info" style="width: 100%; max-height: 80vh; overflow-y: auto; padding-right: 15px;">
 
                         <form method="post" action="{% if course_form %}{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}{% else %}{% url 'create_form' join_code=course.join_code %}{% endif %}">
@@ -127,10 +228,6 @@
                                             value="{% if course_form %}{{ course_form.color_5 }}{% else %}{{ default_colors.color_5 }}{% endif %}" />
                                 </div>
                             </div>
-        
-                            <button type="submit" class="btn btn-success">
-                                {% if course_form %}Update Form{% else %}Continue{% endif %}
-                            </button>
                         </form>
                     </div>
                 </div>
@@ -139,8 +236,57 @@
                 </div>
             </div>
         </div>
-
-
-
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    function updateTime() {
+      // Get the slider values
+      let rawHour = parseInt(document.getElementById("hour-slider").value, 10);
+      const minuteVal = parseInt(document.getElementById("minute-slider").value, 10);
+
+      // Treat 24 as 0 (midnight)
+      if (rawHour === 24) {
+        rawHour = 0;
+      }
+
+      // Set AM/PM based on rawHour
+      const period = rawHour < 12 ? "AM" : "PM";
+
+      // Convert rawHour to 12-hour format (with 0 becoming 12)
+      let hour12 = rawHour % 12;
+      if (hour12 === 0) {
+        hour12 = 12;
+      }
+
+      // Format the minute value with a leading zero if necessary
+      const minuteStr = minuteVal < 10 ? "0" + minuteVal : minuteVal;
+
+      // Update time display element
+      document.getElementById("time-display").textContent =
+        hour12 + ":" + minuteStr;
+      
+      document.getElementById("am-pm-selector").textContent = period;
+    }
+
+    // Initialize the time display
+    updateTime();
+
+    function incrementCounter(counterID) {
+        let quantityDisplay = document.getElementById(counterID);
+        let quantity = parseInt(quantityDisplay.textContent, 10) || 0;
+        quantity++;
+        quantityDisplay.textContent = quantity;
+    }
+
+    function decrementCounter(counterID) {
+        let quantityDisplay = document.getElementById(counterID);
+        let quantity = parseInt(quantityDisplay.textContent, 10) || 0;
+        if (quantity > 0) {
+            quantity--;
+            quantityDisplay.textContent = quantity;
+        }
+    }
+</script>
 {% endblock %}

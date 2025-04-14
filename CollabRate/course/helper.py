@@ -48,4 +48,3 @@ def rebuild_all_questions(request, course_form):
     """
     rebuild_likert_questions(request, course_form)
     rebuild_open_ended_questions(request, course_form)
-    course_form.save()

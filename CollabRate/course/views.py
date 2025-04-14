@@ -168,10 +168,11 @@ def draft_questions(request, join_code, course_form_id):
     open_ended_qs = list(course_form.open_ended_questions.all().order_by('order'))
 
     if request.method == "POST":
+        rebuild_all_questions(request, course_form)
+        course_form.save()
         action = request.POST.get('action')
 
         if action == 'add_likert':
-            rebuild_likert_questions(request, course_form)
             course_form.num_likert += 1
             course_form.save()
 
@@ -198,7 +199,6 @@ def draft_questions(request, join_code, course_form_id):
             return HttpResponseRedirect(request.path)
         
         elif action == 'add_open_ended':
-            rebuild_open_ended_questions(request, course_form)
             course_form.num_open_ended += 1
             course_form.save()
             
@@ -225,7 +225,6 @@ def draft_questions(request, join_code, course_form_id):
             return HttpResponseRedirect(request.path)
 
         elif action == 'save':
-            rebuild_all_questions(request, course_form)
             scroll_target = "scroll-save"
             return HttpResponseRedirect(f"{request.path}#{scroll_target}")
         
