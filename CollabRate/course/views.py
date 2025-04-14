@@ -183,4 +183,51 @@ def edit_form(request, join_code, form_id):
         'course': course,
     })
 
+# FOR STUDENTS ANSWERING FORM
+@login_required
+def answer_form(request, join_code, form_id):
+    course = get_object_or_404(Course, join_code=join_code)
+    form_obj = get_object_or_404(CourseForm, pk=form_id, course=course)
 
+    # Student check
+    if request.user.user_type != CustomUser.STUDENT:
+        return HttpResponseForbidden("Only students can answer forms.")
+    
+    if request.method == "POST":
+
+        # LiKERT QUESTIONS
+        for likert in form_obj.likert_questions.all():
+            answer_value = request.POST.get(f"likert_{likert.id}")
+            if answer_value:
+                try:
+                    answer_value = int(answer_value)
+                    LikertResponse.objects.create(
+                        student=request.user,
+                        likert=likert,
+                        answer=answer_value
+                    )
+                except ValueError:
+                    pass
+        
+        # OPEN ENDED QUESTIONS
+        for open_q in form_obj.open_ended_questions.all():
+            response_text = request.POST.get(f"open_{open_q.id}", "").strip()
+            if response_text:
+                OpenEndedResponse.objects.create(
+                    student=request.user,
+                    open_ended=open_q,
+                    answer=response_text
+                )
+        messages.success(request, "Responses submitted successfully!")
+        
+        # Redirect to dashboard - might need to change depending on what we want to do
+        return redirect("dashboard", join_code=course.join_code)
+    
+    else:
+        # On GET render the the page with all the questions
+        return render(request, "course/answer_form.html", {
+            "course": course,
+            "form_obj": form_obj, # I renamed this to avoid conflict with 'form' template
+            "likert_questions": form_obj.likert_questions.all(),
+            "open_questions": form_obj.open_ended_questions.all()
+        })
