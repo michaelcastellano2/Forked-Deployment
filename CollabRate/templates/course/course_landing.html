@@ -17,36 +17,36 @@
             <div class="course-header" style="background-color: {{ course.color }};"><b>{{ course.code }}</b> | {{ course.title }}</div>
 
             <h1 class="section-title">To Do</h1>
-            <div class="card">
-                <div class="info">
-                    <p>Delivery 2</p>
-                    <small>Due 2/24 at 3:00 pm</small>
-                </div>
-                <span class="dot red"></span>
-            </div>
-            <div class="card">
-                <div class="info">
-                    <p>Delivery 3</p>
-                    <small>Due 2/24 at 3:00 pm</small>
-                </div>
-                <span class="dot red"></span>
-            </div>
-            <div class="card">
-                <div class="info">
-                    <p>Delivery 3</p>
-                    <small>Due 2/24 at 3:00 pm</small>
-                </div>
-                <span class="dot red"></span>
-            </div>
-            <a href="{% url 'peer_results' course.code '1' %}" class="text-decoration-none text-reset">
-                <div class="card">
-                    <div class="info">
-                        <p>Delivery 1</p>
-                        <small>Due 2/15 at 3:00 pm | Published 2/20 at 12:00 pm</small>
+
+            {% if forms %}
+                {% for form in forms %}
+                    <div class="card">
+                        <div class="info">
+                            <p>{{form.name}}</p>
+                            <small>Due {{ form.due_date|date:"M d" }} at {{ form.due_time|time:"g:i a" }}</small>
+                        </div>
+                        <span class="dot red"></span>
                     </div>
-                    <span class="dot green"></span>
-                </div>
-            </a>
+                {% endfor %}
+            {% else %}
+                <p>No forms assigned to your team.</p>
+            {% endif %}
+
+            <h1 class="section-title">Feedback</h1>
+            {% if released_forms %}
+                {% for form in released_forms %}
+                    <a href="{% url 'peer_results' course.code '1' %}" class="text-decoration-none text-reset">
+                        <div class="card">
+                            <div class="info">
+                                <p>{{ form.name }}</p>
+                            </div>
+                            <span class="dot green"></span>
+                        </div>
+                    </a>
+                {% endfor %}  
+            {% else %}
+                <p>No feedback has been released yet.</p>
+            {% endif %}
                      
         </div>
     {% else %}

@@ -42,11 +42,19 @@
         {% endif %}
         <!-- Return -->
         <div class="d-flex align-items-center px-2 mb-4">
-            <a href="{% url 'dashboard' %}"
-               class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
-                <i class="fa-solid fa-rotate-left fa-1-5x me-3"></i>
-                <span>Return to Courses</span>
-            </a>
+            {% if request.resolver_match.url_name == 'peer_results' %}
+                <a href="{% url 'course_detail' course.join_code %}"
+                class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
+                    <i class="fa-solid fa-rotate-left fa-1-5x me-3"></i>
+                    <span>Return to Dashboard</span>
+                </a>
+            {% else %}
+                <a href="{% url 'dashboard' %}"
+                class="text-decoration-none text-reset d-flex justify-content-center align-items-center">
+                    <i class="fa-solid fa-rotate-left fa-1-5x me-3"></i>
+                    <span>Return to Courses</span>
+                </a>
+            {% endif %}
         </div>
     </div>
 </div>
