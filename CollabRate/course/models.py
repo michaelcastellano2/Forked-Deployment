@@ -71,24 +71,37 @@ class OpenEnded(models.Model):
         return f"Open-Ended Q{self.order} for Form {self.course_form.id}: {self.question}"
     
 class LikertResponse(models.Model):
-    student = models.ForeignKey(
+    evaluator = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         limit_choices_to={'user_type': CustomUser.STUDENT},
-        related_name="likert_responses"
+        related_name="likert_responses_as_evaluator"
+    )
+    evaluee = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        limit_choices_to={'user_type': CustomUser.STUDENT},
+        related_name="likert_responses_as_evaluee"
     )
     likert = models.ForeignKey(Likert, on_delete=models.CASCADE, related_name="responses")
     answer = models.IntegerField()
+
 
     def __str__(self):
         return f"Response by {self.student.username} to Likert Q{self.likert.order} (Form {self.likert.course_form.id}): {self.answer}"
     
 class OpenEndedResponse(models.Model):
-    student = models.ForeignKey(
+    evaluator = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         limit_choices_to={'user_type': CustomUser.STUDENT},
-        related_name="open_ended_responses"
+        related_name="open_ended_responses_as_evaluator"
+    )
+    evaluee = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        limit_choices_to={'user_type': CustomUser.STUDENT},
+        related_name="open_ended_responses_as_evaluee"
     )
     open_ended = models.ForeignKey(OpenEnded, on_delete=models.CASCADE, related_name="responses")
     answer = models.TextField()
