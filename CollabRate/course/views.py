@@ -7,6 +7,9 @@ from accounts.models import CustomUser
 from .models import CourseForm, Team, Likert, OpenEnded
 from .helper import *
 from django.http import HttpResponseRedirect
+from django.core.mail import send_mail 
+from django.urls import reverse 
+from django.conf import settings
 
 @login_required
 def course_detail(request, join_code):
@@ -16,10 +19,17 @@ def course_detail(request, join_code):
         course=course,
         teams__in=teams
     ).distinct()
+    #Display available feedback 
+    released_forms = CourseForm.objects.filter(
+    course=course,
+    teams__in=teams,
+    state='released'  
+    ).distinct()
 
     return render(request, 'course/course_landing.html', {
         'course': course,
         'forms' : forms,
+        'released_forms': released_forms,
         })
 
 @login_required
@@ -240,11 +250,39 @@ def draft_questions(request, join_code, course_form_id):
         elif action == 'publish':
             course_form.state = 'published'
             course_form.save()
+            students = CustomUser.objects.filter(teams__course_forms=course_form).distinct()
+            for student in students:
+                subject = f"New Form Published: '{course_form.name}' in {course.code}"
+                message = (
+                f"Hello,\n\n"
+                f"A new form \"{course_form.name}\" has been published in your course \"{course.title}\".\n\n"
+                f"Due Date: {course_form.due_date.strftime('%b %d')} at {course_form.due_time.strftime('%I:%M %p')}\n\n"
+                f"Please visit the course page to fill out the form.\n\n"
+                f"Thank you!"
+                )
+                from_email = settings.DEFAULT_FROM_EMAIL
+                recipient_list = [student.email]
+                send_mail(subject, message, from_email, recipient_list)
+            messages.success(request, f"Form '{course_form.name}' published and notifications sent.")
             return redirect('course_detail', join_code=join_code)
         
         elif action == 'release':
             course_form.state = 'released'
             course_form.save()
+            students = CustomUser.objects.filter(teams__course_forms=course_form).distinct()
+            for student in students:
+                subject = f"Feedback Released: '{course_form.name}' in {course.code}"
+                message = (
+                    f"Hello,\n\n"
+                    f"Feedback for the form \"{course_form.name}\" in your course \"{course.title}\" has been released.\n\n"
+                    f"You can now view your feedback and scores on the course page.\n\n"
+                    f"Thank you!"
+                )
+                from_email = settings.DEFAULT_FROM_EMAIL
+                recipient_list = [student.email]
+                send_mail(subject, message, from_email, recipient_list)
+
+            messages.success(request, f"Form '{course_form.name}' released and notifications sent.")
             return redirect('course_detail', join_code=join_code)
 
     context = {
@@ -292,6 +330,21 @@ def edit_form(request, join_code, form_id):
         form.color_5 = request.POST.get('color_5')
 
         form.save() 
+        students = CustomUser.objects.filter(teams__course_forms=form).distinct()
+        if form.state == 'published':
+            for student in students:
+                subject = f"Update: '{form.name}' in {course.code}"
+                message = (
+                    f"Hello,\n\n"
+                    f"The form \"{form.name}\" in your course \"{course.title}\" has been updated.\n\n"
+                    f"Due Date: {form.due_date} at {form.due_time.strftime('%I:%M %p')}\n\n"
+                    f"Check your course page for more details.\n\n"
+                    "Thank you!"
+                )
+                from_email = settings.DEFAULT_FROM_EMAIL
+                recipient_list = [student.email]
+                send_mail(subject, message, from_email, recipient_list)
+    
         messages.success(request, f"Form '{form.name}' has been updated successfully.")
         return redirect('view_forms', join_code=join_code)
     
