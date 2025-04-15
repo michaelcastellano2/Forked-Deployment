@@ -6,8 +6,6 @@
     <link rel="stylesheet" href="{% static 'course/manage_forms.css' %}">
     <link rel="stylesheet" href="{% static 'course/course_landing.css' %}">
     <link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
-    <!-- Link our new time picker slider CSS file -->
-    <link rel="stylesheet" href="{% static 'course/timepicker.css' %}">
     
     <style>
         .color-select {
@@ -54,8 +52,8 @@
             <div class="d-flex flex-row" style="flex: 0 0 91.5%;">
                 <div class="w-70 p-4 me-5 custom-scroll" style="overflow-y: auto; max-height: 75vh; margin-top: 2.5vh;">
                     <div class="content">
-                        <!-- <form method="post" action="{% if course_form %}{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}{% else %}{% url 'create_form' join_code=course.join_code %}{% endif %}">
-                            {% csrf_token %} -->
+                        <form method="post" action="{% if course_form %}{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}{% else %}{% url 'create_form' join_code=course.join_code %}{% endif %}">
+                            {% csrf_token %}
                             <div class="title-edit-container m-5">
                                 <div class="title-input-wrapper">
                                 <input 
@@ -63,12 +61,22 @@
                                     id="peerEvalTitle" 
                                     class="title-input" 
                                     placeholder="Untitled Peer Evaluation Form"
+                                    name="form_name"
                                     value="{% if course_form %}{{ course_form.name }}{% else %}{% endif %}">
                                 <i class="fa-solid fa-pencil pencil-icon" aria-hidden="true"></i>
                                 </div>
-                            </div>  
+                            </div> 
                             <div class="additional-controls my-4 ps-5">
                                 <div class="additional-controls-gap form-check form-switch mb-3 d-flex align-items-center p-0">
+                                    <div class="d-flex flex-column">
+                                        <label class="form-label" for="selfEvaluateToggle">
+                                            Require that Students Self-Evaluate
+                                        </label>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fa-solid fa-exclamation-circle me-2"></i>
+                                            <small class="text-muted">Each Student Must Assess their own Performance</small>
+                                        </div>
+                                    </div>
                                     <label class="toggle-switch">
                                         <input 
                                             type="checkbox" 
@@ -80,67 +88,114 @@
                                         <div class="toggle-switch-handle"></div>
                                         </div>
                                     </label>
-                                    <label class="form-label" for="selfEvaluateToggle">
-                                        Require that Students Self-Evaluate
-                                    </label>
                                 </div>
-                              
-                                <!-- Likert Scale Questions Counter -->
-                                <div class="additional-controls-gap d-flex align-items-center mb-1">
-                                    <div class="quantity-counter d-flex align-items-center">
-                                        <!-- Decrement Button -->
-                                        <button type="button" class="circle-btn decrement-btn" onclick="decrementCounter('likertCounter')">
-                                            &minus;
-                                        </button>
-                                    
-                                        <!-- Display the quantity -->
-                                        <span id="likertCounter" class="mx-2 d-flex justify-content-center counter-ui">3</span>
-                                    
-                                        <!-- Increment Button -->
-                                        <button type="button" class="circle-btn increment-btn" onclick="incrementCounter('likertCounter')">
-                                            &plus;
-                                        </button>
-                                    </div>
-                                    <label class="form-label">
-                                        Likert Scale Questions
-                                    </label>
-                                </div>
-
+                            </div> 
+                            <div class="additional-controls my-4 ps-5">
                                 <!-- Open-Ended Questions Counter -->
-                                <div class="additional-controls-gap d-flex align-items-center mb-3">
-                                    <div class="quantity-counter d-flex align-items-center">
-                                        <!-- Decrement Button -->
-                                        <button type="button" class="circle-btn decrement-btn" onclick="decrementCounter('openEndedCounter')">
-                                            &minus;
-                                        </button>
-                                    
-                                        <!-- Display the quantity -->
-                                        <span id="openEndedCounter" class="mx-2 d-flex justify-content-center counter-ui">3</span>
-                                    
-                                        <!-- Increment Button -->
-                                        <button type="button" class="circle-btn increment-btn" onclick="incrementCounter('openEndedCounter')">
-                                            &plus;
-                                        </button>
-                                    </div>
+                                <div class="additional-controls-gap d-flex align-items-center mb-1">
                                     <label class="form-label">
                                         Open Ended Questions
                                     </label>
+                                    <div class="quantity-counter d-flex align-items-center">
+                                        <!-- Decrement Button -->
+                                        <button type="button" class="circle-btn decrement-btn" onclick="decrementCounter('openEndedCounter', 'num_open_ended')">
+                                            &minus;
+                                        </button>
+                                    
+                                        <!-- Display the quantity -->
+                                        <span id="openEndedCounter" class="mx-2 d-flex justify-content-center counter-ui">
+                                            {% if course_form %}{{ course_form.num_open_ended }}{% else %}1{% endif %}
+                                        </span>
+                                    
+                                        <!-- Increment Button -->
+                                        <button type="button" class="circle-btn increment-btn" onclick="incrementCounter('openEndedCounter', 'num_open_ended')">
+                                            &plus;
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Hidden input field to send the value via the form post request -->
+                                <input type="number" id="num_open_ended" name="num_open_ended" class="form-control d-none" required min="0" step="1" 
+                                    value="{% if course_form %}{{ course_form.num_open_ended }}{% else %}1{% endif %}">
+
+                                <!-- Likert Scale Questions Counter -->
+                                <div class="additional-controls-gap d-flex align-items-center mb-4">
+                                    <label class="form-label">
+                                        Likert Scale Questions
+                                    </label>
+                                    <div class="quantity-counter d-flex align-items-center">
+                                        <!-- Decrement Button -->
+                                        <button type="button" class="circle-btn decrement-btn" onclick="decrementCounter('likertCounter', 'num_likert')">
+                                            &minus;
+                                        </button>
+                                    
+                                        <!-- Display the quantity -->
+                                        <span id="likertCounter" class="mx-2 d-flex justify-content-center counter-ui">
+                                            {% if course_form %}{{ course_form.num_likert }}{% else %}3{% endif %}
+                                        </span>
+                                    
+                                        <!-- Increment Button -->
+                                        <button type="button" class="circle-btn increment-btn" onclick="incrementCounter('likertCounter', 'num_likert')">
+                                            &plus;
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Hidden input field to send the value via the form post request -->
+                                <input type="number" id="num_likert" name="num_likert" class="form-control d-none" required min="0" step="1" 
+                                    value="{% if course_form %}{{ course_form.num_likert }}{% else %}3{% endif %}">
+
+                                <label class="form-label">Likert Color Range</label>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fa-solid fa-exclamation-circle me-2"></i>
+                                    <small class="text-muted">Styling will be Applied across all Likert Questions</small>
+                                </div>
+                                <div id="customColorPickerBar">
+                                    <!-- Each input is a color picker with its default value -->
+                                    <div class="color-picker-item">
+                                        <input type="color" id="picker1" name="color_1" class="custom-color-input"
+                                            value="{% if course_form %}{{ course_form.color_1 }}{% else %}{{ default_colors.color_1 }}{% endif %}">
+                                        <small class="text-muted">1</small>
+                                    </div>
+                                    <div class="color-picker-item">
+                                        <input type="color" id="picker2" name="color_2" class="custom-color-input" 
+                                            value="{% if course_form %}{{ course_form.color_2 }}{% else %}{{ default_colors.color_2 }}{% endif %}">
+                                        <small class="text-muted">2</small>
+                                    </div>
+                                    <div class="color-picker-item">
+                                        <input type="color" id="picker3" name="color_3" class="custom-color-input" 
+                                            value="{% if course_form %}{{ course_form.color_3 }}{% else %}{{ default_colors.color_3 }}{% endif %}">
+                                        <small class="text-muted">3</small>
+                                    </div>
+                                    <div class="color-picker-item">
+                                        <input type="color" id="picker4" name="color_4" class="custom-color-input" 
+                                            value="{% if course_form %}{{ course_form.color_4 }}{% else %}{{ default_colors.color_4 }}{% endif %}">
+                                        <small class="text-muted">4</small>
+                                    </div>
+                                    <div class="color-picker-item">
+                                        <input type="color" id="picker5" name="color_5" class="custom-color-input" 
+                                            value="{% if course_form %}{{ course_form.color_5 }}{% else %}{{ default_colors.color_5 }}{% endif %}">
+                                        <small class="text-muted">5</small>
+                                    </div>
                                 </div>
                             </div>
                             
                             <!-- Time picker slider HTML inserted directly above progress-step-container -->
-                            <div class="d-flex my-4 ps-5">
-                                <div class="time-picker-container">
-                                    <div class="time-display" id="time-display">12:00</div>
-                                    <div id="am-pm-selector">AM</div>
-                                    <div class="sliders">
-                                        <input type="range" id="hour-slider" min="0" max="23" step="1" value="0" oninput="updateTime()">
-                                        <input type="range" id="minute-slider" min="0" max="55" step="5" value="0" oninput="updateTime()">
-                                    </div>
+                            <div class="d-flex mt-5 ps-5 flex-column">
+                                <label class="form-label">Select Due Date</label>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fa-solid fa-exclamation-circle me-2"></i>
+                                    <small class="text-muted">Student Responses May be Manually Published after the Due Date</small>
                                 </div>
+                                {% include "course/calendar.html" %}
                             </div>
-                            
-                            <div class="progress-step-container">
+
+                            <div class="d-flex align-items-center pe-5 pb-4 justify-content-end next-page-container">
+                                <span>Page 1 of 2</span>
+                                <button type="submit" name="action" value="save" class="progress-step-arrow">
+                                    <i class="fa fa-arrow-right next-page"></i>
+                                </button>
+                            </div>
+
+                            <!-- <div class="progress-step-container">
                                 <div class="progress-bars">
                                 <div class="progress-bar progress-bar-active"></div>
                                 <div class="progress-bar progress-bar-inactive"></div>
@@ -151,10 +206,10 @@
                                     <i class="fa fa-arrow-right"></i>
                                 </button>
                                 </div>
-                            </div>
-                        <!-- </form> -->
+                            </div> -->
+                        </form>
                     </div>
-                    <div class="form-info" style="width: 100%; max-height: 80vh; overflow-y: auto; padding-right: 15px;">
+                    <!-- <div class="form-info" style="width: 100%; max-height: 80vh; overflow-y: auto; padding-right: 15px;">
 
                         <form method="post" action="{% if course_form %}{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}{% else %}{% url 'create_form' join_code=course.join_code %}{% endif %}">
                             {% csrf_token %}
@@ -232,7 +287,7 @@
                                 <i class="fa fa-arrow-right"></i>
                             </button>
                         </form>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="w-30">
                     {% include "course/view_forms_sidebar.html" %}
@@ -245,50 +300,62 @@
 {% block script %}
 <script>
     function updateTime() {
-      // Get the slider values
       let rawHour = parseInt(document.getElementById("hour-slider").value, 10);
       const minuteVal = parseInt(document.getElementById("minute-slider").value, 10);
 
-      // Treat 24 as 0 (midnight)
       if (rawHour === 24) {
         rawHour = 0;
       }
 
-      // Set AM/PM based on rawHour
       const period = rawHour < 12 ? "AM" : "PM";
 
-      // Convert rawHour to 12-hour format (with 0 becoming 12)
       let hour12 = rawHour % 12;
       if (hour12 === 0) {
         hour12 = 12;
       }
 
-      // Format the minute value with a leading zero if necessary
       const minuteStr = minuteVal < 10 ? "0" + minuteVal : minuteVal;
 
-      // Update time display element
-      document.getElementById("time-display").textContent =
-        hour12 + ":" + minuteStr;
-      
+      document.getElementById("time-display").textContent = hour12 + ":" + minuteStr;
       document.getElementById("am-pm-selector").textContent = period;
+
+      const hourHidden = rawHour < 10 ? "0" + rawHour : rawHour;
+      document.getElementById("due_time").value = hourHidden + ":" + minuteStr;
     }
 
-    // Initialize the time display
-    updateTime();
+    document.addEventListener("DOMContentLoaded", function() {
+      const dueTimeInput = document.getElementById("due_time");
+      if (dueTimeInput && dueTimeInput.value) {
+        const [h, m] = dueTimeInput.value.split(":");
+        document.getElementById("hour-slider").value = parseInt(h, 10);
+        document.getElementById("minute-slider").value = parseInt(m, 10);
+      }
+      updateTime();
+    });
 
-    function incrementCounter(counterID) {
-        let quantityDisplay = document.getElementById(counterID);
+    function incrementCounter(displayID, hiddenInputID) {
+        let quantityDisplay = document.getElementById(displayID);
         let quantity = parseInt(quantityDisplay.textContent, 10) || 0;
         quantity++;
         quantityDisplay.textContent = quantity;
+
+        let hiddenInput = document.getElementById(hiddenInputID);
+        if (hiddenInput) {
+            hiddenInput.value = quantity;
+        }
     }
 
-    function decrementCounter(counterID) {
-        let quantityDisplay = document.getElementById(counterID);
+    function decrementCounter(displayID, hiddenInputID) {
+        let quantityDisplay = document.getElementById(displayID);
         let quantity = parseInt(quantityDisplay.textContent, 10) || 0;
         if (quantity > 0) {
             quantity--;
             quantityDisplay.textContent = quantity;
+
+            let hiddenInput = document.getElementById(hiddenInputID);
+            if (hiddenInput) {
+                hiddenInput.value = quantity;
+            }
         }
     }
 </script>

@@ -101,7 +101,7 @@
 }
 
 .progress-bar-active {
-  background-color: #5ee794;
+  background-color: #8ed2a9;
 }
 
 .progress-bar-inactive {
@@ -121,10 +121,10 @@
 }
 
 .progress-step-arrow {
-  width: 32px;
-  height: 32px;
-  background-color: #5ee794;
-  border-radius: 50%;
+  width: 6rem;
+  height: 3rem;
+  background-color: #8ed2a9;
+  border-radius: 10px;
   border: none;
   display: flex;
   align-items: center;
@@ -152,7 +152,7 @@
 
 .content {
   background: white;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 10px 15px 0 rgba(0, 0, 0, 0.37);
   border-radius: 7.5px;
   border: 1px solid rgba(0, 0, 0, 0.18);
 }
@@ -204,7 +204,7 @@
 }
 
 .additional-controls-gap {
-  gap: 3rem;
+  gap: 1rem;
 }
 /* Downsized toggle switch: overall dimensions 60px by 30px */
 .toggle-switch {
@@ -257,8 +257,8 @@
 
 /* When checked, update background and move the handle */
 .toggle-switch input[type="checkbox"]:checked + .toggle-switch-background {
-  background-color: #5ee794;
-  box-shadow: inset 0 0 0 1.5px #5ee794;
+  background-color: #8ed2a9;
+  box-shadow: inset 0 0 0 1.5px #8ed2a9;
 }
 
 /* Move the handle when the checkbox is checked.
@@ -266,7 +266,7 @@
 */
 .toggle-switch input[type="checkbox"]:checked + .toggle-switch-background .toggle-switch-handle {
   transform: translateX(30px);  
-  box-shadow: 0 1.5px 3.75px rgba(0, 0, 0, 0.2), 0 0 0 2.25px #5ee794;  
+  box-shadow: 0 1.5px 3.75px rgba(0, 0, 0, 0.2), 0 0 0 2.25px #8ed2a9;  
   /* The extra 3px ring (3 * 0.75 = 2.25px) is maintained */
 }
 
@@ -274,7 +274,7 @@
    Adjust the right offset from -15px to -11.25px (15 * 0.75) */
 .toggle-switch input[type="checkbox"]:checked + .toggle-switch:before {
   content: "On";
-  color: #5ee794;
+  color: #8ed2a9;
   right: -11.25px;
 }
 
@@ -321,7 +321,7 @@
 
 .increment-btn:hover {
   color: white;
-  background-color: #5ee794;
+  background-color: #8ed2a9;
 }
 
 /* The number displayed between the minus/plus buttons */
@@ -330,4 +330,60 @@
   /* so the text doesn't jump around */
   text-align: center;
   font-weight: 500;
+}
+
+/* Container styling for the color picker bar */
+#customColorPickerBar {
+  display: flex;
+}
+
+.custom-color-input {
+  width: 50px;               /* Set width as desired */
+  height: 50px;              /* Set height as desired */
+  border: none;
+  border-radius: 0;          /* Square corners */
+  cursor: pointer;
+  
+  /* Remove default browser appearance */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  
+  /* Optional: subtle box shadow for interactivity */
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+/* For WebKit browsers: remove default padding and style the swatch */
+.custom-color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.custom-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 0;
+}
+
+/* For Mozilla browsers: remove default border and apply circular shape */
+.custom-color-input::-moz-color-swatch {
+  border: none;
+  border-radius: 0;
+}
+
+.custom-color-input:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.color-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;  /* Center the input and label horizontally */
+}
+
+.next-page {
+  font-size: 1.75rem;
+}
+
+.next-page-container {
+  gap: 1.25rem;
 }

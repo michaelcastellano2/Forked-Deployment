@@ -1,0 +1,127 @@
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'course/calendar.css' %}">
+    <link rel="stylesheet" href="{% static 'course/timepicker.css' %}">
+{% endblock %}
+
+<div class="calendar">
+    <div class="header">
+        <button id="prevBtn" type="button">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="monthYear" id="monthYear"></div>
+        <button id="nextBtn" type="button">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    </div>
+    <div class="days">
+        <div class="day">Mon</div>
+        <div class="day">Tue</div>
+        <div class="day">Wed</div>
+        <div class="day">Thu</div>
+        <div class="day">Fri</div>
+        <div class="day">Sat</div>
+        <div class="day">Sun</div>
+    </div>
+    <div class="dates" id="dates"></div>
+    <div class="time-picker-container p-2">
+        <div class="time-display" id="time-display">12:00</div>
+        <div class="pe-2" id="am-pm-selector">AM</div>
+        <div class="sliders">
+            <input type="range" id="hour-slider" min="0" max="23" step="1" value="0" oninput="updateTime()">
+            <input type="range" id="minute-slider" min="0" max="55" step="5" value="0" oninput="updateTime()">
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="due_date" name="due_date" required
+           value="{% if course_form and course_form.due_date %}{{ course_form.due_date|date:'Y-m-d' }}{% else %}{% now 'Y-m-d' %}{% endif %}">
+
+ <input type="hidden" id="due_time" name="due_time" required
+    value="{% if course_form and course_form.due_time %}{{ course_form.due_time|time:'H:i' }}{% else %}23:55{% endif %}">
+
+<script>
+    const monthYearElement = document.getElementById('monthYear');
+    const datesElement = document.getElementById('dates');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const dueDateInput = document.getElementById('due_date');
+
+    let currentDate = new Date();
+    let selectedDate = new Date();
+
+    if (dueDateInput && dueDateInput.value) {
+        const [year, month, day] = dueDateInput.value.split('-');
+        selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        currentDate = new Date(selectedDate);
+    }
+
+    const updateCalendar = () => {
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth();
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        const totalDays = lastDay.getDate();
+        const firstDayIndex = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+        const lastDayIndex = lastDay.getDay() === 0 ? 6 : lastDay.getDay() - 1;
+
+        const monthYearString = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+        monthYearElement.textContent = monthYearString;
+
+        let datesHTML = '';
+
+        if (firstDayIndex > 0) {
+        const prevLastDay = new Date(currentYear, currentMonth, 0).getDate();
+        for (let i = firstDayIndex; i > 0; i--) {
+            const dateNumber = prevLastDay - i + 1;
+            datesHTML += `<div class="date inactive">${dateNumber}</div>`;
+        }
+        }
+
+        for (let i = 1; i <= totalDays; i++) {
+        const date = new Date(currentYear, currentMonth, i);
+        const activeClass = date.toDateString() === selectedDate.toDateString() ? 'active' : '';
+        datesHTML += `<div class="date ${activeClass}" data-day="${i}">${i}</div>`;
+        }
+
+        const remainingDays = 7 - ((firstDayIndex + totalDays) % 7);
+        if (remainingDays < 7) {
+        for (let i = 1; i <= remainingDays; i++) {
+            datesHTML += `<div class="date inactive">${i}</div>`;
+        }
+        }
+
+        datesElement.innerHTML = datesHTML;
+    };
+
+    prevBtn.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        updateCalendar();
+    });
+
+    nextBtn.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        updateCalendar();
+    });
+
+    datesElement.addEventListener('click', (e) => {
+        if (e.target.classList.contains('date') && !e.target.classList.contains('inactive')) {
+        const currentActive = datesElement.querySelector('.active');
+        if (currentActive) {
+            currentActive.classList.remove('active');
+        }
+        e.target.classList.add('active');
+
+        const clickedDay = parseInt(e.target.getAttribute('data-day'), 10);
+        selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), clickedDay);
+        
+        if (dueDateInput) {
+            dueDateInput.value = selectedDate.toISOString().split('T')[0];
+        }
+        console.log("Selected date:", selectedDate);
+        }
+    });
+
+    updateCalendar();
+</script>
+          

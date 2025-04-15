@@ -128,6 +128,7 @@ def edit_info(request, join_code, course_form_id):
     }
 
     if request.method == "POST":
+        print("REQUEST: ", request.POST.get("num_likert", "WHAT"))
         modified_num_likert = int(request.POST.get("num_likert", course_form.num_likert))
         if modified_num_likert < course_form.num_likert:
             Likert.objects.filter(course_form=course_form, order__gte=modified_num_likert).delete()
@@ -247,6 +248,9 @@ def draft_questions(request, join_code, course_form_id):
     }
     return render(request, 'course/draft_questions.html', context)
 
+
+
+
 @login_required
 def view_forms(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
@@ -257,14 +261,23 @@ def view_forms(request, join_code):
     })
 
 @login_required
-def delete_form(request, join_code, form_id):
-    course = get_object_or_404(Course, join_code=join_code)
+def delete_form(request, join_code, course_form_id):
+    course_form = get_object_or_404(CourseForm, pk=course_form_id)
+    name = course_form.name
+
+    course_form.delete()
+    messages.success(request, f"{name} has been deleted.")
+
+    return redirect('create_form', join_code=join_code)
+# @login_required
+# def delete_form(request, join_code, form_id):
+#     course = get_object_or_404(Course, join_code=join_code)
     
-    if request.method == "POST":
-        form = get_object_or_404(CourseForm, form_id=form_id)
-        form.delete()  
+#     if request.method == "POST":
+#         form = get_object_or_404(CourseForm, form_id=form_id)
+#         form.delete()  
     
-    return redirect('view_forms', join_code=join_code)
+#     return redirect('view_forms', join_code=join_code)
 
 @login_required
 def edit_form(request, join_code, form_id):
