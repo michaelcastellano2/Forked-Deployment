@@ -12,7 +12,7 @@
     {% include "course/sidenav.html" %}
 
     {% if user.user_type == "student" %}
-        <!-- Student view (your Figma-styled layout) -->
+        <!-- Student view -->
         <div class="main-container">
             <div class="course-header" style="background-color: {{ course.color }};"><b>{{ course.code }}</b> | {{ course.title }}</div>
 
@@ -20,6 +20,7 @@
 
             {% if forms %}
                 {% for form in forms %}
+                    <a href="{% url 'answer_form' join_code=course.join_code form_id=form.id %}" style="text-decoration:none; color:inherit;">
                     <div class="card">
                         <div class="info">
                             <p>{{form.name}}</p>
