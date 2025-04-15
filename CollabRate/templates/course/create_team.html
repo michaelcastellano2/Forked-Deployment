@@ -56,9 +56,9 @@
         </div>
 
         <!-- Listing existing teams in this course -->
-        {% if course.team_set.all %}
+        {% if course.teams.all %}
             <div class="accordion" id="teamsAccordion">
-                {% for team in course.team_set.all %}
+                {% for team in course.teams.all %}
                 <div class="accordion-item mb-2">
                     <h2 class="accordion-header" id="heading{{ team.id }}">
                         <button 

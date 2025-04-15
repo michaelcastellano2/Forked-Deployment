@@ -1,35 +1,98 @@
 {% extends 'collabrate/base.html' %}
-
 {% block title %}Dashboard{% endblock %}
 {% load static %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'course/course_landing.css' %}">
 <link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
 <style>
     .top-banner {
         background-color: {{ course.color }};
+        border-radius: 8px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        width: 95%;
     }
 
-    .top-banner {
-    border-radius: 8px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    width: 90%;
-}
+    .top-banner h1 {
+        margin-left: 12px;
+        margin-top: 10px;
+        font-size: 32px;
+        color: black;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6),
+                     -1px -1px 2px rgba(255, 255, 255, 0.6),
+                     1px -1px 2px rgba(255, 255, 255, 0.6),
+                     -1px 1px 2px rgba(255, 255, 255, 0.6);
+    }
 
-.top-banner h1 {
-    margin-left: 12px;
-    margin-top: 10px;
-    font-size: 32px;
-    color: black;
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6), /* Light white shadow */
-    -1px -1px 2px rgba(255, 255, 255, 0.6),
-    1px -1px 2px rgba(255, 255, 255, 0.6),
-    -1px 1px 2px rgba(255, 255, 255, 0.6);
-}
-
+    a {
+      text-decoration: none;
+      outline: none;
+    }
+    a:hover,
+    a:focus,
+    a:active {
+      text-decoration: none;
+    }
+    .list-group-item {
+      width: 95%;
+      border-radius: 7.5px;
+      margin-bottom: 1rem;
+      padding: 20px;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s ease-in-out;
+      position: relative;
+    }
+    .draft {
+      background-color: #f2f0ef;
+    }
+    .published {
+      background-color: #FFD464;
+    }
+    .released {
+      background-color: #3D5A80;
+      color: black;
+    }
+    .card-text {
+      font-size: 14px;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 500;
+    }
+    .forms-sidebar-heading {
+      font-size: 2rem;
+      border-bottom: solid black 1px;
+    }
+    .create-form-box {
+      background-color: #8ed2a9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      height: 120px;
+      position: relative;
+    }
+    .create-form-box .fa-plus {
+      color: #0a6531;
+      font-size: 2rem;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: black;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .delete-btn:hover {
+      color: #e75e5e;
+    }
 </style>
 {% endblock %}
 
@@ -39,45 +102,45 @@
 
 <div class="d-flex">
     <div class="d-flex">
-    {% include "course/sidenav.html" %}
-</div>
+        {% include "course/sidenav.html" %}
+    </div>
+    
     <div class="container mt-4" style="width: 100vw; margin-left: 12px;">
-        <div class="top-banner">
-            <h1><strong>{{ course.code }} | </strong>{{ course.title }}</h1>
-        </div>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Form Name</th>
-                    <th>Due Date</th>
-                    <th>Due Time</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for form in forms %}
-                <tr>
-                    <td>
-                        <a href="{% url 'edit_form' join_code=course.join_code form_id=form.form_id %}">{{ form.name }}</a>
-                    </td>
-                    <td>{{ form.due_date }}</td>
-                    <td>{{ form.due_time }}</td>
-                    <td>
+        <h1>
+            {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> View Forms
+        </h1>
 
-                        <form method="post" action="{% url 'delete_form' join_code=course.join_code form_id=form.form_id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
+        <div class="p-3">
+            <div class="list-group d-flex flex-column flex-grow-1 overflow-auto" style="max-height: 75vh;">
+
+                {% for form in forms %}
+                <a href="{% url 'edit_info' join_code=course.join_code course_form_id=form.id %}"
+                    class="list-group-item {% if form.state == 'draft' %}draft{% elif form.state == 'published' %}published{% elif form.state == 'released' %}released{% endif %}">
+                    <div class="card-body">
+                        <button type="button" class="delete-btn" onclick="deleteForm(event, '{{ form.id }}')">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <h5 class="card-title">{% if form.name %}{{ form.name }}{% else %}Untitled Form{% endif %}</h5>
+                        <p class="card-text">
+                            Due: {{ form.due_date|date:"F j, Y" }} at {{ form.due_time|date:"H:i" }}
+                        </p>
+                    </div>
+                </a>
                 {% empty %}
-                <tr>
-                    <td colspan="4">No forms found.</td>
-                </tr>
+                <p>No forms available for this course.</p>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
     </div>
 </div>
 
+<script>
+  function deleteForm(event, formId) {
+    event.stopPropagation();
+    event.preventDefault();
+    if (confirm("Are you sure you want to delete this form?")) {
+        window.location.href = "{% url 'delete_form' course.join_code 0 %}".replace("0", formId);
+    }
+  }
+</script>
 {% endblock %}

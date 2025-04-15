@@ -44,13 +44,165 @@
             <div style="flex: 0 0  8.5%;">
                 <div class="pb-3">
                     <h1>
-                        {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> {% if course_form %}Edit Form{% else %}Create Form{% endif %}
+                        {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> {% if form_expired %}Review Responses{% elif course_form %}Edit Form{% else %}Create Form{% endif %}
                     </h1>
                 </div>
                 <hr class="m-0" style="opacity: 100%;">
             </div>
             <div class="d-flex flex-row" style="flex: 0 0 91.5%;">
                 <div class="w-70 p-4 me-5 custom-scroll" style="overflow-y: auto; max-height: 75vh; margin-top: 2.5vh;">
+                    {% if course_form.state == "released" %}
+                    <p>This form's results have been released to your students. Overview:</p>
+
+                    {% elif form_expired %}
+                    <p>Your published form's due date has passed. Please review student responses and proceed to releasing grades.</p>
+                    
+                    {% if course.teams.all %}
+                    <div class="accordion" id="teamsAccordion">
+                        {% for team in course.teams.all %}
+                        <div class="accordion-item mb-3">
+                            <h2 class="accordion-header" id="headingTeam{{ team.id }}">
+                                <button 
+                                    class="accordion-button collapsed" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#collapseTeam{{ team.id }}" 
+                                    aria-expanded="false" 
+                                    aria-controls="collapseTeam{{ team.id }}">
+                                    {{ team.name }}
+                                </button>
+                            </h2>
+                            <div 
+                                id="collapseTeam{{ team.id }}" 
+                                class="accordion-collapse collapse" 
+                                aria-labelledby="headingTeam{{ team.id }}" 
+                                data-bs-parent="#teamsAccordion">
+                                <div class="accordion-body">
+                                    
+                                    <div class="accordion" id="membersAccordion{{ team.id }}">
+                                        {% for member in team.students.all %}
+                                        <div class="accordion-item mb-2">
+                                            <h2 class="accordion-header" id="headingMember{{ member.id }}">
+                                                <button 
+                                                    class="accordion-button collapsed" 
+                                                    type="button" 
+                                                    data-bs-toggle="collapse" 
+                                                    data-bs-target="#collapseMember{{ member.id }}" 
+                                                    aria-expanded="false" 
+                                                    aria-controls="collapseMember{{ member.id }}">
+                                                    {{ member.username }}'s Responses
+                                                </button>
+                                            </h2>
+                                            <div 
+                                                id="collapseMember{{ member.id }}" 
+                                                class="accordion-collapse collapse" 
+                                                aria-labelledby="headingMember{{ member.id }}" 
+                                                data-bs-parent="#membersAccordion{{ team.id }}">
+                                                <div class="accordion-body">
+                    
+                                                    <!-- Likert Questions -->
+                                                    {% if likert_questions %}
+                                                    <div class="mt-3">
+                                                        <h6>Likert Scale Questions</h6>
+                                                        <ul>
+                                                            {% for question in likert_questions %}
+                                                            <li style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                                                                {{ question.question }}
+                                                            </li>
+                                                                {% for response in question.responses.all %}
+                                                                <p style="margin: 0;">Response by {{ response.evaluator.username }}: 
+                                                                    {% if response.answer == 0 %}
+                                                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                                                        <div style="background-color: {{ course_form.color_1 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                        <span>{{ question.option_1 }}</span>
+                                                                    </div>
+                                                                    {% elif response.answer == 1 %}
+                                                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                                                        <div style="background-color: {{ course_form.color_2 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                        <span>{{ question.option_2 }}</span>
+                                                                    </div>
+                                                                    {% elif response.answer == 2 %}
+                                                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                                                        <div style="background-color: {{ course_form.color_3 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                        <span>{{ question.option_3 }}</span>
+                                                                    </div>
+                                                                    {% elif response.answer == 3 %}
+                                                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                                                        <div style="background-color: {{ course_form.color_4 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                        <span>{{ question.option_4 }}</span>
+                                                                    </div>
+                                                                    {% elif response.answer == 4 %}
+                                                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                                                        <div style="background-color: {{ course_form.color_5 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                        <span>{{ question.option_5 }}</span>
+                                                                    </div>
+                                                                    {% endif %}</p>
+                                                                {% empty %}
+                                                                <p>No responses yet for this question.</p>
+                                                                {% endfor %}
+                                                            {% empty %}
+                                                            <li>No likert questions added.</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    {% endif %}
+                    
+                                                    <!-- Open-ended Questions -->
+                                                    {% if open_ended_questions %}
+                                                    <div class="mt-3">
+                                                        <h6>Open-Ended Questions</h6>
+                                                        <i class="fa-solid fa-exclamation-circle me-2"></i>
+                                                        <small class="text-muted">You may edit open responses to filter names or inappropriate responses.</small>
+                                                        <ul>
+                                                            {% for question in open_ended_questions %}
+                                                            <li style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                                                                {{ question.question }}
+                                                            </li>
+                                                                {% for response in question.responses.all %}
+                                                                <div id="response-{{ response.id }}">
+                                                                <form method="post" action="{% url 'update_open_ended_response' course_form.course.join_code course_form.id response.id %}">
+                                                                    {% csrf_token %}
+                                                                <p>Response by {{ response.evaluator.username }}: </p>
+                                                                    <textarea name="answer" rows="2" cols="25">{{ response.answer }}</textarea>
+                                                                    <button type="submit">Save</button>
+                                                                </form>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% empty %}
+                                                            <li>No open-ended questions added.</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    {% endif %}
+                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                    
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        No teams have been created yet.
+                    </div>
+                    {% endif %}
+
+                    <form method="POST">
+                    {% csrf_token %}
+                    <div class="text-end mt-4">
+                        <button type="submit" name="action" value="release" class="btn btn-primary px-4 py-2"
+                            style="font-weight: 500;">
+                            Release Results to Students
+                        </button>
+                    </div>
+                    </form>
+
+                    {% else %}
                     <div class="content">
                         <form method="post" action="{% if course_form %}{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}{% else %}{% url 'create_form' join_code=course.join_code %}{% endif %}">
                             {% csrf_token %}
@@ -288,6 +440,7 @@
                             </button>
                         </form>
                     </div> -->
+                    {% endif %}
                 </div>
                 <div class="w-30">
                     {% include "course/view_forms_sidebar.html" %}
@@ -298,6 +451,7 @@
 {% endblock %}
 
 {% block script %}
+
 <script>
     function updateTime() {
       let rawHour = parseInt(document.getElementById("hour-slider").value, 10);

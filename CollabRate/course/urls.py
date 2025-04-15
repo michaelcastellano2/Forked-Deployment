@@ -21,6 +21,11 @@ urlpatterns = [
     # path('<str:join_code>/form/delete/<int:form_id>/', views.delete_form, name='delete_form'),
     path('<str:join_code>/form/edit/<int:form_id>/', views.edit_form, name='edit_form'),
     path('<str:join_code>/', views.course_detail, name='course_detail'),
-    path('course/<str:join_code>/clear/', views.clear_course_forms, name='clear_course_forms')
+
+    path('<str:join_code>/form/edit/<int:form_id>/update_response/<int:response_id>/', views.update_open_ended_response, name='update_open_ended_response'),
+
+    #debug paths
+    path('course/<str:join_code>/clear/', views.clear_course_forms, name='clear_course_forms'),
+    path('course/<str:join_code>/insert/', views.insert_responses, name='insert_responses')
 
 ]

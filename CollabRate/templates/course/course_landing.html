@@ -59,6 +59,12 @@
                 {% csrf_token %}
                 <button type="submit">Clear Course Forms (TESTING PURPOSES)</button>
             </form>
+            <form method="POST" action="{% url 'insert_responses' course.join_code %}">
+                {% csrf_token %}
+                <button type="submit">
+                    Insert Likert and Open Responses
+                </button>
+            </form>
 
         </div>
     {% endif %}

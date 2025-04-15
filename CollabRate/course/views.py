@@ -4,12 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from dashboard.models import Course
 from accounts.models import CustomUser
-from .models import CourseForm, Team, Likert, OpenEnded
+from .models import CourseForm, Team, Likert, OpenEnded, LikertResponse, OpenEndedResponse
 from .helper import *
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail 
 from django.urls import reverse 
 from django.conf import settings
+from datetime import datetime, time
 
 # @login_required
 # def course_detail(request, join_code):
@@ -45,6 +46,13 @@ def groups(request, join_code):
 def create_team(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
     user = request.user
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
     
     # Safeguard
     is_professor = (user == course.professor)
@@ -87,6 +95,13 @@ def create_team(request, join_code):
 def create_form(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
     forms = CourseForm.objects.filter(course=course)
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
 
     # Default color values
     default_colors = {
@@ -143,6 +158,13 @@ def edit_info(request, join_code, course_form_id):
     course_form = get_object_or_404(CourseForm, pk=course_form_id)
     forms = CourseForm.objects.filter(course=course)
 
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
+
     default_colors = {
         'color_1': "#872729",  # default color 1
         'color_2': "#C44B4B",  # default color 2
@@ -173,13 +195,45 @@ def edit_info(request, join_code, course_form_id):
         course_form.color_5 = request.POST.get("color_5", course_form.color_5)
         course_form.save()
 
+        action = request.POST.get('action')
+    
+        if action == 'release':
+            course_form.state = 'released'
+            course_form.save()
+            print("🔁 POST request received!")
+            '''
+            students = CustomUser.objects.filter(teams__course_forms=course_form).distinct()
+            for student in students:
+                subject = f"Feedback Released: '{course_form.name}' in {course.code}"
+                message = (
+                    f"Hello,\n\n"
+                    f"Feedback for the form \"{course_form.name}\" in your course \"{course.title}\" has been released.\n\n"
+                    f"You can now view your feedback and scores on the course page.\n\n"
+                    f"Thank you!"
+                )
+                from_email = settings.DEFAULT_FROM_EMAIL
+                recipient_list = [student.email]
+                send_mail(subject, message, from_email, recipient_list)
+            '''
+            messages.success(request, f"Form '{course_form.name}' released and notifications sent.")
+            return redirect('course_detail', join_code=join_code)
+
         return redirect('draft_questions', join_code=join_code, course_form_id=course_form.pk)
     
+    now = datetime.now()
+    form_expired = False
+    if course_form and course_form.state == "published":
+        due_datetime = datetime.combine(course_form.due_date, course_form.due_time)
+        form_expired = now > due_datetime
+
     return render(request, 'course/manage_forms.html', {
         'course': course,
         'default_colors': default_colors,
         'forms': forms,
         'course_form': course_form,
+        'form_expired': form_expired,
+        'likert_questions': course_form.likert_questions.all(),
+        'open_ended_questions': course_form.open_ended_questions.all(),
     })
 
 # @login_required
@@ -276,6 +330,13 @@ def draft_questions(request, join_code, course_form_id):
     course = get_object_or_404(Course, join_code=join_code)
     course_form = get_object_or_404(CourseForm, pk=course_form_id)
     course_forms = CourseForm.objects.filter(course=course)
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
 
     likert_qs = list(course_form.likert_questions.all().order_by('order'))
     open_ended_qs = list(course_form.open_ended_questions.all().order_by('order'))
@@ -391,10 +452,19 @@ def draft_questions(request, join_code, course_form_id):
 @login_required
 def view_forms(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
+    course_forms = CourseForm.objects.filter(course=course)
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
 
     return render(request, "course/view_forms.html", {
         "join_code": join_code,
         "course": course,
+        'forms': course_forms,
     })
 
 @login_required
@@ -445,10 +515,46 @@ def clear_course_forms(request, join_code):
 
     return redirect('course_detail', join_code=join_code)
 
+def insert_responses(request, join_code):
+    if request.method == 'POST':
+        # Likert responses
+        LikertResponse.objects.create(
+            answer=1,
+            likert_id=34,
+            evaluator_id=1,
+            evaluee_id=1
+        )
+        LikertResponse.objects.create(
+            answer=4,
+            likert_id=35,
+            evaluator_id=1,
+            evaluee_id=1
+        )
+
+        # Open-ended response
+        OpenEndedResponse.objects.create(
+            answer="Organization",
+            open_ended_id=27,
+            evaluator_id=1,
+            evaluee_id=1
+        )
+
+        return redirect('course_detail', join_code=join_code)
+
+    return redirect('course_detail', join_code=join_code)
+
+
 @login_required
 def edit_form(request, join_code, form_id):
     course = get_object_or_404(Course, join_code=join_code)
     form = get_object_or_404(CourseForm, pk=form_id, course=course)
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
     
     if request.method == 'POST':
         form.name = request.POST.get('form_name')
@@ -484,3 +590,13 @@ def edit_form(request, join_code, form_id):
         'form': form,
         'course': course,
     })
+
+@login_required
+def update_open_ended_response(request, join_code, form_id, response_id):
+    if request.method == 'POST':
+        new_answer = request.POST.get('answer')
+        response = OpenEndedResponse.objects.get(id=response_id)
+        response.answer = new_answer
+        response.save()
+        url = reverse('edit_info', kwargs={'join_code': join_code, 'course_form_id': form_id})
+        return redirect(f"{url}#response-{response_id}")
