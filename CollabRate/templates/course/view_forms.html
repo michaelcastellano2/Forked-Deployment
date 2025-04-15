@@ -58,7 +58,7 @@
                 {% for form in forms %}
                 <tr>
                     <td>
-                        <a href="{% url 'edit_form' join_code=course.join_code form_id=form_form.id %}">{{ form.name }}</a>
+                        <a href="{% url 'edit_form' join_code=course.join_code form_id=form.form_id %}">{{ form.name }}</a>
                     </td>
                     <td>{{ form.due_date }}</td>
                     <td>{{ form.due_time }}</td>
