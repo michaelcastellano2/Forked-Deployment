@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from dashboard.models import Course
 from accounts.models import CustomUser
-from .models import CourseForm, Team, Likert, OpenEnded, LikertResponse, OpenEndedResponse
+from .models import CourseForm, Team, Likert, LikertResponse, OpenEnded, OpenEndedResponse
 from .helper import *
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail 
@@ -590,6 +590,154 @@ def edit_form(request, join_code, form_id):
         'form': form,
         'course': course,
     })
+
+@login_required
+def answer_form(request, join_code, form_id):
+    # Local imports to avoid potential circular dependencies
+    from .models import LikertResponse, OpenEndedResponse
+
+    # Retrieve the course and associated form.
+    course = get_object_or_404(Course, join_code=join_code)
+    form_obj = get_object_or_404(CourseForm, pk=form_id, course=course)
+
+    # Ensure that only students can answer the form.
+    if request.user.user_type != CustomUser.STUDENT:
+        return HttpResponseForbidden("Only students can answer forms.")
+
+    if request.method == "POST":
+        if form_obj.self_evaluate:
+            evaluee = request.user
+        else:
+            evaluee_id = request.POST.get("evaluee_id")
+            if not evaluee_id:
+                messages.error(request, "No evaluated student selected.")
+                return redirect(request.path)
+            try:
+                evaluee = CustomUser.objects.get(pk=evaluee_id, user_type=CustomUser.STUDENT)
+            except CustomUser.DoesNotExist:
+                messages.error(request, "Selected evaluated student does not exist.")
+                return redirect(request.path)
+
+        # Process Likert-scale question responses.
+        for likert in form_obj.likert_questions.all():
+            answer_value = request.POST.get(f"likert_{likert.id}")
+            if answer_value:
+                try:
+                    answer_value_int = int(answer_value)
+                    LikertResponse.objects.create(
+                        evaluator=request.user,
+                        evaluee=evaluee,
+                        likert=likert,
+                        answer=answer_value_int
+                    )
+                except ValueError:
+                    pass
+
+        for open_q in form_obj.open_ended_questions.all():
+            response_text = request.POST.get(f"open_{open_q.id}", "").strip()
+            if response_text:
+                OpenEndedResponse.objects.create(
+                    evaluator=request.user,
+                    evaluee=evaluee,
+                    open_ended=open_q, 
+                    answer=response_text
+                )
+
+        messages.success(request, "Your responses have been submitted successfully!")
+        return redirect("course_detail", join_code=course.join_code)
+
+    # For GET requests, prepare context for rendering the answer form template.
+    context = {
+        "course": course,
+        "form_obj": form_obj,
+        "likert_questions": form_obj.likert_questions.all(),
+        "open_questions": form_obj.open_ended_questions.all(),
+    }
+    if not form_obj.self_evaluate:
+        # Provide potential peers for evaluation (exclude the evaluator themself).
+        teams = course.teams.filter(students=request.user)
+        potential_peers = set()
+        for team in teams:
+            for student in team.students.exclude(pk=request.user.pk):
+                potential_peers.add(student)
+        context["potential_peers"] = list(potential_peers)
+
+    return render(request, "course/answer_form.html", context)
+
+
+@login_required
+def answer_form(request, join_code, form_id):
+    # Local imports to avoid potential circular dependencies
+    from .models import LikertResponse, OpenEndedResponse
+
+    # Retrieve the course and associated form.
+    course = get_object_or_404(Course, join_code=join_code)
+    form_obj = get_object_or_404(CourseForm, pk=form_id, course=course)
+
+    # Ensure that only students can answer the form.
+    if request.user.user_type != CustomUser.STUDENT:
+        return HttpResponseForbidden("Only students can answer forms.")
+
+    if request.method == "POST":
+        if form_obj.self_evaluate:
+            evaluee = request.user
+        else:
+            evaluee_id = request.POST.get("evaluee_id")
+            if not evaluee_id:
+                messages.error(request, "No evaluated student selected.")
+                return redirect(request.path)
+            try:
+                evaluee = CustomUser.objects.get(pk=evaluee_id, user_type=CustomUser.STUDENT)
+            except CustomUser.DoesNotExist:
+                messages.error(request, "Selected evaluated student does not exist.")
+                return redirect(request.path)
+
+        # Process Likert-scale question responses.
+        for likert in form_obj.likert_questions.all():
+            answer_value = request.POST.get(f"likert_{likert.id}")
+            if answer_value:
+                try:
+                    answer_value_int = int(answer_value)
+                    LikertResponse.objects.create(
+                        evaluator=request.user,
+                        evaluee=evaluee,
+                        likert=likert,
+                        answer=answer_value_int
+                    )
+                except ValueError:
+                    pass
+
+        for open_q in form_obj.open_ended_questions.all():
+            response_text = request.POST.get(f"open_{open_q.id}", "").strip()
+            if response_text:
+                OpenEndedResponse.objects.create(
+                    evaluator=request.user,
+                    evaluee=evaluee,
+                    open_ended=open_q, 
+                    answer=response_text
+                )
+
+        messages.success(request, "Your responses have been submitted successfully!")
+        return redirect("course_detail", join_code=course.join_code)
+
+    # For GET requests, prepare context for rendering the answer form template.
+    context = {
+        "course": course,
+        "form_obj": form_obj,
+        "likert_questions": form_obj.likert_questions.all(),
+        "open_questions": form_obj.open_ended_questions.all(),
+    }
+    if not form_obj.self_evaluate:
+        # Provide potential peers for evaluation (exclude the evaluator themself).
+        teams = course.teams.filter(students=request.user)
+        potential_peers = set()
+        for team in teams:
+            for student in team.students.exclude(pk=request.user.pk):
+                potential_peers.add(student)
+        context["potential_peers"] = list(potential_peers)
+
+    return render(request, "course/answer_form.html", context)
+
 
 @login_required
 def update_open_ended_response(request, join_code, form_id, response_id):
