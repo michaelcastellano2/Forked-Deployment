@@ -221,8 +221,8 @@ def answer_form(request, join_code, form_id):
                 )
         messages.success(request, "Responses submitted successfully!")
         
-        # Redirect to dashboard - might need to change depending on what we want to do
-        return redirect("dashboard", join_code=course.join_code)
+        # Redirect to the landing page - might need to change depending on what we want to do
+        return redirect("course_detail", join_code=course.join_code)
     
     else:
         # On GET render the the page with all the questions

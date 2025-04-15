@@ -17,5 +17,5 @@ urlpatterns = [
     path('<str:join_code>/form/edit/<int:form_id>/', views.edit_form, name='edit_form'),
 
     # For students answering form
-    path('course/<str:join_code>/form/answer/<int:form_id>/', views.answer_form, name='answer_form'),
+    path('<str:join_code>/form/answer/<int:form_id>/', views.answer_form, name='answer_form'),
 ]
