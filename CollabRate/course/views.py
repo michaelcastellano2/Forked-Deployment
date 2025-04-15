@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from dashboard.models import Course
 from accounts.models import CustomUser
-from .models import CourseForm, Team
+from .models import CourseForm, Team, Likert, LikertResponse, OpenEndedQuestion, OpenEndedResponse
 
 @login_required
 def course_detail(request, join_code):
@@ -186,6 +186,7 @@ def edit_form(request, join_code, form_id):
 # FOR STUDENTS ANSWERING FORM
 @login_required
 def answer_form(request, join_code, form_id):
+    from .models import LikertResponse, OpenEndedResponse
     course = get_object_or_404(Course, join_code=join_code)
     form_obj = get_object_or_404(CourseForm, pk=form_id, course=course)
 
