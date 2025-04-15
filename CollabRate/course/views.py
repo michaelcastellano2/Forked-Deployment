@@ -19,10 +19,17 @@ def course_detail(request, join_code):
         course=course,
         teams__in=teams
     ).distinct()
+    #Display available feedback 
+    released_forms = CourseForm.objects.filter(
+    course=course,
+    teams__in=teams,
+    state='released'  
+    ).distinct()
 
     return render(request, 'course/course_landing.html', {
         'course': course,
         'forms' : forms,
+        'released_forms': released_forms,
         })
 
 @login_required
