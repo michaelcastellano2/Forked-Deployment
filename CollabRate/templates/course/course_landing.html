@@ -36,7 +36,7 @@
             <h1 class="section-title">Feedback</h1>
             {% if released_forms %}
                 {% for form in released_forms %}
-                    <a href="{% url 'peer_results' course.code '1' %}" class="text-decoration-none text-reset">
+                    <a href="{% url 'peer_results' join_code=course.join_code form_id=form.id %}" class="text-decoration-none text-reset">
                         <div class="card">
                             <div class="info">
                                 <p>{{ form.name }}</p>
@@ -58,7 +58,7 @@
             <button><a href="{% url 'create_form' course.join_code %}">Create Form</a></button>
             <form method="POST" action="{% url 'clear_course_forms' course.join_code %}">
                 {% csrf_token %}
-                <button type="submit">Clear Course Forms (TESTING PURPOSES)</button>
+                <button type="submit">Clear ALL Course Forms/Questions (TESTING PURPOSES)</button>
             </form>
 
         </div>
