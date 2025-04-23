@@ -13,11 +13,6 @@ from django.conf import settings
 from datetime import datetime, time
 from django.http import JsonResponse
 
-# @login_required
-# def course_detail(request, join_code):
-#     course = get_object_or_404(Course, join_code=join_code)
-#     return render(request, 'course/course_landing.html', {'course': course})
-
 @login_required
 def course_detail(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
