@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from django.urls import reverse 
 from django.conf import settings
 from datetime import datetime, time
+from django.http import JsonResponse
 
 # @login_required
 # def course_detail(request, join_code):
@@ -23,12 +24,10 @@ def course_detail(request, join_code):
     teams = Team.objects.filter(course=course,students=request.user)
     forms = CourseForm.objects.filter(
         course=course,
-        teams__in=teams
     ).distinct()
 
     released_forms = CourseForm.objects.filter(
     course=course,
-    teams__in=teams,
     state='released'  
     ).distinct()
 
@@ -473,6 +472,17 @@ def delete_form(request, join_code, course_form_id):
     name = course_form.name
 
     course_form.delete()
+
+
+
+    # First delete responses (they depend on questions)
+    LikertResponse.objects.filter(likert__course_form=course_form).delete()
+    OpenEndedResponse.objects.filter(open_ended__course_form=course_form).delete()
+
+    # Then delete the questions
+    course_form.likert_questions.all().delete()
+    course_form.open_ended_questions.all().delete()
+
     messages.success(request, f"{name} has been deleted.")
 
     return redirect('create_form', join_code=join_code)
@@ -514,35 +524,6 @@ def clear_course_forms(request, join_code):
         messages.error(request, 'Course not found.')
 
     return redirect('course_detail', join_code=join_code)
-
-def insert_responses(request, join_code):
-    if request.method == 'POST':
-        # Likert responses
-        LikertResponse.objects.create(
-            answer=1,
-            likert_id=34,
-            evaluator_id=1,
-            evaluee_id=1
-        )
-        LikertResponse.objects.create(
-            answer=4,
-            likert_id=35,
-            evaluator_id=1,
-            evaluee_id=1
-        )
-
-        # Open-ended response
-        OpenEndedResponse.objects.create(
-            answer="Organization",
-            open_ended_id=27,
-            evaluator_id=1,
-            evaluee_id=1
-        )
-
-        return redirect('course_detail', join_code=join_code)
-
-    return redirect('course_detail', join_code=join_code)
-
 
 @login_required
 def edit_form(request, join_code, form_id):
@@ -743,8 +724,36 @@ def answer_form(request, join_code, form_id):
 def update_open_ended_response(request, join_code, form_id, response_id):
     if request.method == 'POST':
         new_answer = request.POST.get('answer')
-        response = OpenEndedResponse.objects.get(id=response_id)
+
+        # Use get_object_or_404 to get the response, providing better error handling
+        response = get_object_or_404(OpenEndedResponse, id=response_id)
+
+        # Update the response with the new answer
         response.answer = new_answer
         response.save()
-        url = reverse('edit_info', kwargs={'join_code': join_code, 'course_form_id': form_id})
-        return redirect(f"{url}#response-{response_id}")
+
+        # Return a JsonResponse instead of redirecting
+        return JsonResponse({
+            'success': True,
+            'message': 'Response updated successfully!',
+            'updated_answer': new_answer,  # Optionally include the updated answer in the response
+            'response_id': response_id,
+        })
+    
+    # If the request is not POST, return an error
+    return JsonResponse({
+        'success': False,
+        'message': 'Invalid request method.'
+    })
+
+@login_required
+def peer_results(request, join_code, form_id):
+    course = get_object_or_404(Course, join_code=join_code)
+    course_form = get_object_or_404(CourseForm, id=form_id, course=course)
+    
+    context = {
+        'course': course,
+        'course_form': course_form,
+    }
+    
+    return render(request, 'course/results.html', context)

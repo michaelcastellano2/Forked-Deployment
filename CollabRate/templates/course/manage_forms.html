@@ -33,6 +33,7 @@
         .w-90{
             width: 90%;
         }
+
     </style>
 {% endblock %}
 
@@ -90,7 +91,7 @@
                                                     data-bs-target="#collapseMember{{ member.id }}" 
                                                     aria-expanded="false" 
                                                     aria-controls="collapseMember{{ member.id }}">
-                                                    {{ member.username }}'s Responses
+                                                    {{ member.username }}'s Feedback
                                                 </button>
                                             </h2>
                                             <div 
@@ -106,44 +107,62 @@
                                                         <h6>Likert Scale Questions</h6>
                                                         <ul>
                                                             {% for question in likert_questions %}
-                                                            <li style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
-                                                                {{ question.question }}
-                                                            </li>
-                                                                {% for response in question.responses.all %}
-                                                                <p style="margin: 0;">Response by {{ response.evaluator.username }}: 
-                                                                    {% if response.answer == 0 %}
-                                                                    <div style="display: flex; align-items: center; gap: 4px;">
-                                                                        <div style="background-color: {{ course_form.color_1 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                        <span>{{ question.option_1 }}</span>
-                                                                    </div>
-                                                                    {% elif response.answer == 1 %}
-                                                                    <div style="display: flex; align-items: center; gap: 4px;">
-                                                                        <div style="background-color: {{ course_form.color_2 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                        <span>{{ question.option_2 }}</span>
-                                                                    </div>
-                                                                    {% elif response.answer == 2 %}
-                                                                    <div style="display: flex; align-items: center; gap: 4px;">
-                                                                        <div style="background-color: {{ course_form.color_3 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                        <span>{{ question.option_3 }}</span>
-                                                                    </div>
-                                                                    {% elif response.answer == 3 %}
-                                                                    <div style="display: flex; align-items: center; gap: 4px;">
-                                                                        <div style="background-color: {{ course_form.color_4 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                        <span>{{ question.option_4 }}</span>
-                                                                    </div>
-                                                                    {% elif response.answer == 4 %}
-                                                                    <div style="display: flex; align-items: center; gap: 4px;">
-                                                                        <div style="background-color: {{ course_form.color_5 }}; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                        <span>{{ question.option_5 }}</span>
-                                                                    </div>
-                                                                    {% endif %}</p>
-                                                                {% empty %}
-                                                                <p>No responses yet for this question.</p>
-                                                                {% endfor %}
+                                                                <li style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 1rem; margin-bottom: 1rem;">
+                                                                    <strong>{{ question.question }}</strong>
+                                                        
+                                                                    {% with responses=question.responses.all %}
+                                                                        {% if responses %}
+                                                                            <ul style="margin-top: 1rem;">
+                                                                                {% for response in responses %}
+                                                                                    {% if response.evaluee == member %}
+                                                                                        <li style="margin-bottom: 0.5rem;">
+                                                                                            {% if response.evaluator == member %}
+                                                                                            <div>Self-evaluation:</div>
+                                                                                            {% else %}
+                                                                                            <div>Response by {{ response.evaluator.username }}:</div>
+                                                                                            {% endif %}
+
+                                                                                            {% if response.answer == 0 %}
+                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
+                                                                                                    <div style="background-color: {{ course_form.color_1 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                                                    <span>{{ question.option_1 }}</span>
+                                                                                                </div>
+                                                                                            {% elif response.answer == 1 %}
+                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
+                                                                                                    <div style="background-color: {{ course_form.color_2 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                                                    <span>{{ question.option_2 }}</span>
+                                                                                                </div>
+                                                                                            {% elif response.answer == 2 %}
+                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
+                                                                                                    <div style="background-color: {{ course_form.color_3 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                                                    <span>{{ question.option_3 }}</span>
+                                                                                                </div>
+                                                                                            {% elif response.answer == 3 %}
+                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
+                                                                                                    <div style="background-color: {{ course_form.color_4 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                                                    <span>{{ question.option_4 }}</span>
+                                                                                                </div>
+                                                                                            {% elif response.answer == 4 %}
+                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
+                                                                                                    <div style="background-color: {{ course_form.color_5 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
+                                                                                                    <span>{{ question.option_5 }}</span>
+                                                                                                </div>
+                                                                                            {% endif %}
+                                                                                        </li>
+                                                                                    {% endif %}
+                                                                                {% endfor %}
+                                                                            </ul>
+                                                                        {% else %}
+                                                                            <p style="margin-top: 0.5rem;">No responses yet for this question.</p>
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                </li>
                                                             {% empty %}
-                                                            <li>No likert questions added.</li>
+                                                                <li>No likert questions added.</li>
                                                             {% endfor %}
                                                         </ul>
+                                                        
+                                                        
                                                     </div>
                                                     {% endif %}
                     
@@ -155,23 +174,28 @@
                                                         <small class="text-muted">You may edit open responses to filter names or inappropriate responses.</small>
                                                         <ul>
                                                             {% for question in open_ended_questions %}
-                                                            <li style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
-                                                                {{ question.question }}
-                                                            </li>
+                                                                <li style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                                                                    {{ question.question }}
+                                                                </li>
                                                                 {% for response in question.responses.all %}
-                                                                <div id="response-{{ response.id }}">
-                                                                <form method="post" action="{% url 'update_open_ended_response' course_form.course.join_code course_form.id response.id %}">
-                                                                    {% csrf_token %}
-                                                                <p>Response by {{ response.evaluator.username }}: </p>
-                                                                    <textarea name="answer" rows="2" cols="25">{{ response.answer }}</textarea>
-                                                                    <button type="submit">Save</button>
-                                                                </form>
+                                                                    {% if response.evaluee == member %}
+                                                                    <div id="response-{{ response.id }}">
+                                                                        <form id="response-form-{{ response.id }}" class="response-form" method="post" action="{% url 'update_open_ended_response' course_form.course.join_code course_form.id response.id %}">
+                                                                            {% csrf_token %}
+                                                                            <p>Response by {{ response.evaluator.username }}:</p>
+                                                                            <textarea name="answer" rows="2" cols="25">{{ response.answer }}</textarea>
+                                                                            <button type="submit">Save</button>
+                                                                        </form>
+                                                                        <div class="response-message" style="color: green; display: none;"></div> <!-- Success message -->
+                                                                    </div>
+                                                                    
+                                                                    {% endif %}
+                                                                {% empty %}
+                                                                    <li>No open-ended questions added.</li>
                                                                 {% endfor %}
-                                                            </div>
-                                                            {% empty %}
-                                                            <li>No open-ended questions added.</li>
                                                             {% endfor %}
                                                         </ul>
+                                                        
                                                     </div>
                                                     {% endif %}
                     
@@ -451,6 +475,47 @@
 {% endblock %}
 
 {% block script %}
+
+<script>
+    // Wait for the DOM to be ready
+    document.addEventListener("DOMContentLoaded", function() {
+        // Get all forms with the class 'response-form'
+        const forms = document.querySelectorAll('.response-form');
+
+        // Loop over each form
+        forms.forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                // Get the form data
+                const formData = new FormData(form);
+
+                // Use fetch to send data asynchronously
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value,
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response from the server (assuming JSON response)
+                    if (data.success) {
+                        // Update the response text or show a success message
+                        const messageDiv = form.querySelector('.response-message');
+                        messageDiv.style.display = 'block';
+                        messageDiv.innerHTML = 'Response saved successfully!';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    });
+</script>
+
 
 <script>
     function updateTime() {

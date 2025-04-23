@@ -27,10 +27,10 @@ urlpatterns = [
 
     #debug paths
     path('course/<str:join_code>/clear/', views.clear_course_forms, name='clear_course_forms'),
-    path('course/<str:join_code>/insert/', views.insert_responses, name='insert_responses'),
 
     # For students answering form
     path('<str:join_code>/form/answer/<int:form_id>/', views.answer_form, name='answer_form'),
 
-
+    # Peer results
+    path('peer_results/<str:join_code>/<int:form_id>/', views.peer_results, name='peer_results'),
 ]
