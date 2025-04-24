@@ -4,12 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from dashboard.models import Course
 from accounts.models import CustomUser
-from .models import CourseForm, Team, Likert, OpenEnded
+from .models import CourseForm, Team, Likert, LikertResponse, OpenEnded, OpenEndedResponse
 from .helper import *
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail 
 from django.urls import reverse 
 from django.conf import settings
+from datetime import datetime, time
+from django.http import JsonResponse
 
 @login_required
 def course_detail(request, join_code):
@@ -17,12 +19,10 @@ def course_detail(request, join_code):
     teams = Team.objects.filter(course=course,students=request.user)
     forms = CourseForm.objects.filter(
         course=course,
-        teams__in=teams
     ).distinct()
 
     released_forms = CourseForm.objects.filter(
     course=course,
-    teams__in=teams,
     state='released'  
     ).distinct()
 
@@ -40,6 +40,13 @@ def groups(request, join_code):
 def create_team(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
     user = request.user
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
     
     # Safeguard
     is_professor = (user == course.professor)
@@ -82,6 +89,13 @@ def create_team(request, join_code):
 def create_form(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
     forms = CourseForm.objects.filter(course=course)
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
 
     # Default color values
     default_colors = {
@@ -138,6 +152,13 @@ def edit_info(request, join_code, course_form_id):
     course_form = get_object_or_404(CourseForm, pk=course_form_id)
     forms = CourseForm.objects.filter(course=course)
 
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
+
     default_colors = {
         'color_1': "#872729",  # default color 1
         'color_2': "#C44B4B",  # default color 2
@@ -168,13 +189,45 @@ def edit_info(request, join_code, course_form_id):
         course_form.color_5 = request.POST.get("color_5", course_form.color_5)
         course_form.save()
 
+        action = request.POST.get('action')
+    
+        if action == 'release':
+            course_form.state = 'released'
+            course_form.save()
+            print("🔁 POST request received!")
+            '''
+            students = CustomUser.objects.filter(teams__course_forms=course_form).distinct()
+            for student in students:
+                subject = f"Feedback Released: '{course_form.name}' in {course.code}"
+                message = (
+                    f"Hello,\n\n"
+                    f"Feedback for the form \"{course_form.name}\" in your course \"{course.title}\" has been released.\n\n"
+                    f"You can now view your feedback and scores on the course page.\n\n"
+                    f"Thank you!"
+                )
+                from_email = settings.DEFAULT_FROM_EMAIL
+                recipient_list = [student.email]
+                send_mail(subject, message, from_email, recipient_list)
+            '''
+            messages.success(request, f"Form '{course_form.name}' released and notifications sent.")
+            return redirect('course_detail', join_code=join_code)
+
         return redirect('draft_questions', join_code=join_code, course_form_id=course_form.pk)
     
+    now = datetime.now()
+    form_expired = False
+    if course_form and course_form.state == "published":
+        due_datetime = datetime.combine(course_form.due_date, course_form.due_time)
+        form_expired = now > due_datetime
+
     return render(request, 'course/manage_forms.html', {
         'course': course,
         'default_colors': default_colors,
         'forms': forms,
         'course_form': course_form,
+        'form_expired': form_expired,
+        'likert_questions': course_form.likert_questions.all(),
+        'open_ended_questions': course_form.open_ended_questions.all(),
     })
 
 @login_required
@@ -182,6 +235,13 @@ def draft_questions(request, join_code, course_form_id):
     course = get_object_or_404(Course, join_code=join_code)
     course_form = get_object_or_404(CourseForm, pk=course_form_id)
     course_forms = CourseForm.objects.filter(course=course)
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
 
     likert_qs = list(course_form.likert_questions.all().order_by('order'))
     open_ended_qs = list(course_form.open_ended_questions.all().order_by('order'))
@@ -299,10 +359,19 @@ def draft_questions(request, join_code, course_form_id):
 @login_required
 def view_forms(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
+    course_forms = CourseForm.objects.filter(course=course)
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
 
     return render(request, "course/view_forms.html", {
         "join_code": join_code,
         "course": course,
+        'forms': course_forms,
     })
 
 @login_required
@@ -311,6 +380,17 @@ def delete_form(request, join_code, course_form_id):
     name = course_form.name
 
     course_form.delete()
+
+
+
+    # First delete responses (they depend on questions)
+    LikertResponse.objects.filter(likert__course_form=course_form).delete()
+    OpenEndedResponse.objects.filter(open_ended__course_form=course_form).delete()
+
+    # Then delete the questions
+    course_form.likert_questions.all().delete()
+    course_form.open_ended_questions.all().delete()
+
     messages.success(request, f"{name} has been deleted.")
 
     return redirect('create_form', join_code=join_code)
@@ -357,6 +437,13 @@ def clear_course_forms(request, join_code):
 def edit_form(request, join_code, form_id):
     course = get_object_or_404(Course, join_code=join_code)
     form = get_object_or_404(CourseForm, pk=form_id, course=course)
+
+    if request.user.user_type != CustomUser.PROFESSOR:
+        messages.error(request, "Access denied: Professors only.")
+        return redirect('dashboard')
+    if course.professor != request.user:
+        messages.error(request, "You do not have permission to access this course.")
+        return redirect('dashboard')
     
     if request.method == 'POST':
         form.name = request.POST.get('form_name')
@@ -392,3 +479,189 @@ def edit_form(request, join_code, form_id):
         'form': form,
         'course': course,
     })
+
+@login_required
+def answer_form(request, join_code, form_id):
+    # Local imports to avoid potential circular dependencies
+    from .models import LikertResponse, OpenEndedResponse
+
+    # Retrieve the course and associated form.
+    course = get_object_or_404(Course, join_code=join_code)
+    form_obj = get_object_or_404(CourseForm, pk=form_id, course=course)
+
+    # Ensure that only students can answer the form.
+    if request.user.user_type != CustomUser.STUDENT:
+        return HttpResponseForbidden("Only students can answer forms.")
+
+    if request.method == "POST":
+        if form_obj.self_evaluate:
+            evaluee = request.user
+        else:
+            evaluee_id = request.POST.get("evaluee_id")
+            if not evaluee_id:
+                messages.error(request, "No evaluated student selected.")
+                return redirect(request.path)
+            try:
+                evaluee = CustomUser.objects.get(pk=evaluee_id, user_type=CustomUser.STUDENT)
+            except CustomUser.DoesNotExist:
+                messages.error(request, "Selected evaluated student does not exist.")
+                return redirect(request.path)
+
+        # Process Likert-scale question responses.
+        for likert in form_obj.likert_questions.all():
+            answer_value = request.POST.get(f"likert_{likert.id}")
+            if answer_value:
+                try:
+                    answer_value_int = int(answer_value)
+                    LikertResponse.objects.create(
+                        evaluator=request.user,
+                        evaluee=evaluee,
+                        likert=likert,
+                        answer=answer_value_int
+                    )
+                except ValueError:
+                    pass
+
+        for open_q in form_obj.open_ended_questions.all():
+            response_text = request.POST.get(f"open_{open_q.id}", "").strip()
+            if response_text:
+                OpenEndedResponse.objects.create(
+                    evaluator=request.user,
+                    evaluee=evaluee,
+                    open_ended=open_q, 
+                    answer=response_text
+                )
+
+        messages.success(request, "Your responses have been submitted successfully!")
+        return redirect("course_detail", join_code=course.join_code)
+
+    # For GET requests, prepare context for rendering the answer form template.
+    context = {
+        "course": course,
+        "form_obj": form_obj,
+        "likert_questions": form_obj.likert_questions.all(),
+        "open_questions": form_obj.open_ended_questions.all(),
+    }
+    if not form_obj.self_evaluate:
+        # Provide potential peers for evaluation (exclude the evaluator themself).
+        teams = course.teams.filter(students=request.user)
+        potential_peers = set()
+        for team in teams:
+            for student in team.students.exclude(pk=request.user.pk):
+                potential_peers.add(student)
+        context["potential_peers"] = list(potential_peers)
+
+    return render(request, "course/answer_form.html", context)
+
+
+@login_required
+def answer_form(request, join_code, form_id):
+    # Local imports to avoid potential circular dependencies
+    from .models import LikertResponse, OpenEndedResponse
+
+    # Retrieve the course and associated form.
+    course = get_object_or_404(Course, join_code=join_code)
+    form_obj = get_object_or_404(CourseForm, pk=form_id, course=course)
+
+    # Ensure that only students can answer the form.
+    if request.user.user_type != CustomUser.STUDENT:
+        return HttpResponseForbidden("Only students can answer forms.")
+
+    if request.method == "POST":
+        if form_obj.self_evaluate:
+            evaluee = request.user
+        else:
+            evaluee_id = request.POST.get("evaluee_id")
+            if not evaluee_id:
+                messages.error(request, "No evaluated student selected.")
+                return redirect(request.path)
+            try:
+                evaluee = CustomUser.objects.get(pk=evaluee_id, user_type=CustomUser.STUDENT)
+            except CustomUser.DoesNotExist:
+                messages.error(request, "Selected evaluated student does not exist.")
+                return redirect(request.path)
+
+        # Process Likert-scale question responses.
+        for likert in form_obj.likert_questions.all():
+            answer_value = request.POST.get(f"likert_{likert.id}")
+            if answer_value:
+                try:
+                    answer_value_int = int(answer_value)
+                    LikertResponse.objects.create(
+                        evaluator=request.user,
+                        evaluee=evaluee,
+                        likert=likert,
+                        answer=answer_value_int
+                    )
+                except ValueError:
+                    pass
+
+        for open_q in form_obj.open_ended_questions.all():
+            response_text = request.POST.get(f"open_{open_q.id}", "").strip()
+            if response_text:
+                OpenEndedResponse.objects.create(
+                    evaluator=request.user,
+                    evaluee=evaluee,
+                    open_ended=open_q, 
+                    answer=response_text
+                )
+
+        messages.success(request, "Your responses have been submitted successfully!")
+        return redirect("course_detail", join_code=course.join_code)
+
+    # For GET requests, prepare context for rendering the answer form template.
+    context = {
+        "course": course,
+        "form_obj": form_obj,
+        "likert_questions": form_obj.likert_questions.all(),
+        "open_questions": form_obj.open_ended_questions.all(),
+    }
+    if not form_obj.self_evaluate:
+        # Provide potential peers for evaluation (exclude the evaluator themself).
+        teams = course.teams.filter(students=request.user)
+        potential_peers = set()
+        for team in teams:
+            for student in team.students.exclude(pk=request.user.pk):
+                potential_peers.add(student)
+        context["potential_peers"] = list(potential_peers)
+
+    return render(request, "course/answer_form.html", context)
+
+
+@login_required
+def update_open_ended_response(request, join_code, form_id, response_id):
+    if request.method == 'POST':
+        new_answer = request.POST.get('answer')
+
+        # Use get_object_or_404 to get the response, providing better error handling
+        response = get_object_or_404(OpenEndedResponse, id=response_id)
+
+        # Update the response with the new answer
+        response.answer = new_answer
+        response.save()
+
+        # Return a JsonResponse instead of redirecting
+        return JsonResponse({
+            'success': True,
+            'message': 'Response updated successfully!',
+            'updated_answer': new_answer,  # Optionally include the updated answer in the response
+            'response_id': response_id,
+        })
+    
+    # If the request is not POST, return an error
+    return JsonResponse({
+        'success': False,
+        'message': 'Invalid request method.'
+    })
+
+@login_required
+def peer_results(request, join_code, form_id):
+    course = get_object_or_404(Course, join_code=join_code)
+    course_form = get_object_or_404(CourseForm, id=form_id, course=course)
+    
+    context = {
+        'course': course,
+        'course_form': course_form,
+    }
+    
+    return render(request, 'course/results.html', context)
