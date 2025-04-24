@@ -11,11 +11,6 @@ from django.core.mail import send_mail
 from django.urls import reverse 
 from django.conf import settings
 
-# @login_required
-# def course_detail(request, join_code):
-#     course = get_object_or_404(Course, join_code=join_code)
-#     return render(request, 'course/course_landing.html', {'course': course})
-
 @login_required
 def course_detail(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
@@ -182,95 +177,6 @@ def edit_info(request, join_code, course_form_id):
         'course_form': course_form,
     })
 
-# @login_required
-# def draft_questions(request, join_code, course_form_id):
-#     course = get_object_or_404(Course, join_code=join_code)
-#     course_form = get_object_or_404(CourseForm, pk=course_form_id)
-#     course_forms = CourseForm.objects.filter(course=course)
-
-#     likert_qs = list(course_form.likert_questions.all().order_by('order'))
-#     open_ended_qs = list(course_form.open_ended_questions.all().order_by('order'))
-
-#     if request.method == "POST":
-#         rebuild_all_questions(request, course_form)
-#         course_form.save()
-#         action = request.POST.get('action')
-
-#         if action == 'add_likert':
-#             course_form.num_likert += 1
-#             course_form.save()
-
-#             scroll_target = "scroll-likert"
-#             return HttpResponseRedirect(f'{request.path}#{scroll_target}')
-        
-#         elif action.startswith('delete_likert_'):
-#             try:
-#                 delete_index = int(action.split("_")[2])
-#             except (ValueError, TypeError):
-#                 delete_index = -1
-            
-#             if delete_index >= 0:
-#                 Likert.objects.filter(course_form=course_form, order=delete_index).delete()
-
-#                 course_form.num_likert -= 1
-#                 course_form.save()
-
-#                 for lk in Likert.objects.filter(course_form=course_form).order_by('order'):
-#                     if lk.order > delete_index:
-#                         lk.order -= 1
-#                         lk.save()
-            
-#             return HttpResponseRedirect(request.path)
-        
-#         elif action == 'add_open_ended':
-#             course_form.num_open_ended += 1
-#             course_form.save()
-            
-#             scroll_target = "scroll-open-ended"
-#             return HttpResponseRedirect(f"{request.path}#{scroll_target}")
-        
-#         elif action.startswith('delete_open_ended_'):
-#             try:
-#                 delete_index = int(action.split("_")[3])
-#             except (ValueError, TypeError):
-#                 delete_index = -1
-
-#             if delete_index >= 0:
-#                 OpenEnded.objects.filter(course_form=course_form, order=delete_index).delete()
-
-#                 course_form.num_open_ended -= 1
-#                 course_form.save()
-
-#                 for oe in OpenEnded.objects.filter(course_form=course_form).order_by('order'):
-#                     if oe.order > delete_index:
-#                         oe.order -= 1
-#                         oe.save()
-            
-#             return HttpResponseRedirect(request.path)
-
-#         elif action == 'save':
-#             scroll_target = "scroll-save"
-#             return HttpResponseRedirect(f"{request.path}#{scroll_target}")
-        
-#         elif action == 'publish':
-#             course_form.state = 'published'
-#             course_form.save()
-#             return redirect('course_detail', join_code=join_code)
-        
-#         elif action == 'release':
-#             course_form.state = 'released'
-#             course_form.save()
-#             return redirect('course_detail', join_code=join_code)
-
-#     context = {
-#         'course': course,
-#         'course_form': course_form,
-#         'forms': course_forms,
-#         'likert_qs': likert_qs,
-#         'open_ended_qs': open_ended_qs,
-#     }
-#     return render(request, 'course/draft_questions.html', context)
-
 @login_required
 def draft_questions(request, join_code, course_form_id):
     course = get_object_or_404(Course, join_code=join_code)
@@ -289,8 +195,8 @@ def draft_questions(request, join_code, course_form_id):
             course_form.num_likert += 1
             course_form.save()
 
-            scroll_target = "scroll-likert"
-            return HttpResponseRedirect(f'{request.path}#{scroll_target}')
+            scroll_target = "likert"
+            return HttpResponseRedirect(f'{request.path}?scroll={scroll_target}')
         
         elif action.startswith('delete_likert_'):
             try:
@@ -309,14 +215,15 @@ def draft_questions(request, join_code, course_form_id):
                         lk.order -= 1
                         lk.save()
             
-            return HttpResponseRedirect(request.path)
+            scroll_target = f"likert-{max(delete_index - 1, 0)}"
+            return HttpResponseRedirect(f'{request.path}?scroll={scroll_target}')
         
         elif action == 'add_open_ended':
             course_form.num_open_ended += 1
             course_form.save()
             
-            scroll_target = "scroll-open-ended"
-            return HttpResponseRedirect(f"{request.path}#{scroll_target}")
+            scroll_target = "open-ended"
+            return HttpResponseRedirect(f"{request.path}?scroll={scroll_target}")
         
         elif action.startswith('delete_open_ended_'):
             try:
@@ -335,11 +242,12 @@ def draft_questions(request, join_code, course_form_id):
                         oe.order -= 1
                         oe.save()
             
-            return HttpResponseRedirect(request.path)
+            scroll_target = f"open-ended-{max(delete_index - 1, 0)}"
+            return HttpResponseRedirect(f'{request.path}?scroll={scroll_target}')
 
         elif action == 'save':
-            scroll_target = "scroll-save"
-            return HttpResponseRedirect(f"{request.path}#{scroll_target}")
+            scroll_target = "save"
+            return HttpResponseRedirect(f"{request.path}?scroll={scroll_target}")
         
         elif action == 'publish':
             course_form.state = 'published'
