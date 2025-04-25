@@ -6,6 +6,25 @@
 {% block head %}
 <link rel="stylesheet" href="{% static 'course/course_landing.css' %}">
 <link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<style>
+  .choices__list--multiple .choices__item {
+    background-color: #8ed2a9;    /* your new bg color */
+    border: 1px solid #8ed2a9;    /* match border to bg */
+    color: white;                  /* tag text color */
+    font-weight: 500;
+    font-size: 1.05rem;
+  }
+  /* the little “×” removal button in each tag */
+  .choices__list--multiple .choices__item .choices__button {
+    color: black;                  /* color of the × icon */
+    opacity: 1;
+  }
+  .choices__list--multiple .choices__item .choices__button:hover {
+    opacity: 1;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -46,7 +65,7 @@
                         <!-- Multiple select for students in the course -->
                         <select name="students" id="students" class="form-select" multiple>
                             {% for student in students %}
-                                <option value="{{ student.id }}">{{ student.username }}</option>
+                                <option value="{{ student.id }}">{{ student.username|capfirst }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -57,7 +76,7 @@
 
         <!-- Listing existing teams in this course -->
         {% if course.teams.all %}
-            <div class="accordion" id="teamsAccordion">
+            <!-- <div class="accordion" id="teamsAccordion">
                 {% for team in course.teams.all %}
                 <div class="accordion-item mb-2">
                     <h2 class="accordion-header" id="heading{{ team.id }}">
@@ -82,12 +101,64 @@
                             <p><strong>Members:</strong></p>
                             <ul>
                                 {% for member in team.students.all %}
-                                <li>{{ member.username }}</li>
+                                <li>{{ member.username|capfirst }}</li>
                                 {% endfor %}
                             </ul>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
+            </div> -->
+            <div class="accordion" id="teamsAccordion">
+                {% for team in course.teams.all %}
+                  <div class="accordion-item mb-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <!-- 1) the accordion toggle -->
+                      <h2 class="accordion-header" id="heading{{ team.id }}">
+                        <button 
+                          class="accordion-button {% if not forloop.first %}collapsed{% endif %}" 
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#collapse{{ team.id }}"
+                          aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                          aria-controls="collapse{{ team.id }}"
+                        >
+                          {{ team.name }}
+                        </button>
+                      </h2>
+              
+                      <!-- 2) delete form -->
+                      <form 
+                        method="POST" 
+                        action="{% url 'delete_team' join_code=course.join_code team_id=team.id %}"
+                        onsubmit="return confirm('Really delete team “{{ team.name }}”?');"
+                      >
+                        {% csrf_token %}
+                        <button 
+                          type="submit" 
+                          class="btn btn-sm btn-outline-danger"
+                          title="Delete team"
+                        >&times;</button>
+                      </form>
+                    </div>
+              
+                    <!-- 3) the collapse body -->
+                    <div 
+                      id="collapse{{ team.id }}" 
+                      class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                      aria-labelledby="heading{{ team.id }}" 
+                      data-bs-parent="#teamsAccordion"
+                    >
+                      <div class="accordion-body">
+                        <p><strong>Members:</strong></p>
+                        <ul>
+                          {% for member in team.students.all %}
+                            <li>{{ member.username|capfirst }}</li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 {% endfor %}
             </div>
         {% else %}
@@ -99,3 +170,15 @@
     </div><!-- End main content -->
 </div><!-- End d-flex container -->
 {% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      new Choices('#students', {
+        removeItemButton: true,
+        placeholderValue: 'Select students…',
+        searchPlaceholderValue: 'Type to search…'
+      });
+    });
+  </script>
+{% endblock %}  

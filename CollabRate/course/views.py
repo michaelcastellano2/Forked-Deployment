@@ -16,25 +16,44 @@ from django.http import JsonResponse
 @login_required
 def course_detail(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
-    teams = Team.objects.filter(course=course,students=request.user)
-    forms = CourseForm.objects.filter(
+    teams = Team.objects.filter(
         course=course,
-    ).distinct()
+        students=request.user,
+    )
 
-    released_forms = CourseForm.objects.filter(
-    course=course,
-    state='released'  
-    ).distinct()
+    team_forms = []
+    for team in teams:
+        todo = team.course_forms.exclude(state='released')
+        released = team.course_forms.filter(state='released')
+        team_forms.append({
+            'team': team,
+            'todo_forms': todo,
+            'released_forms': released,
+        })
 
     return render(request, 'course/course_landing.html', {
         'course': course,
-        'forms' : forms,
-        'released_forms': released_forms,
+        'team_forms': team_forms,
     })
 
 @login_required
 def groups(request, join_code):
     return redirect('course_detail', join_code=join_code)
+
+@login_required
+def delete_team(request, join_code, team_id):
+    course = get_object_or_404(Course, join_code=join_code)
+    team   = get_object_or_404(Team, pk=team_id, course=course)
+
+    if request.user != course.professor:
+        messages.error(request, "Access denied.")
+        return redirect('create_team', join_code=join_code)
+
+    if request.method == "POST":
+        name = team.name
+        team.delete()
+        messages.success(request, f"Team '{name}' has been deleted.")
+    return redirect('create_team', join_code=join_code)
 
 @login_required
 def create_team(request, join_code):
@@ -57,6 +76,9 @@ def create_team(request, join_code):
     if not (is_professor or is_enrolled):
         return HttpResponseForbidden("You do not have permission to create a team for this course.")
     
+    assigned_ids = Team.objects.filter(course=course).values_list('students__id', flat=True)
+    available_students = course.students.exclude(id__in=assigned_ids)
+    
     if request.method == "POST":
         team_name = request.POST.get("team_name", "")
         selected_ids = request.POST.getlist("students")
@@ -65,24 +87,22 @@ def create_team(request, join_code):
             messages.error(request, "Team name is required.")
             return render(request, "course/create_team.html", {
                 "course": course,
-                "students": course.students.all()
+                "students": available_students,
             })
         
         # Create new team
         team = Team.objects.create(name=team_name, course=course)
-        enrolled_students = course.students.filter(id__in=selected_ids)
-        team.students.set(enrolled_students)
-        
-        if is_enrolled and user not in team.students.all():
-            team.students.add(user)
-        
+        team.students.set(
+            course.students.filter(id__in=selected_ids)
+        )
+    
         messages.success(request, f"Team '{team.name}' created successfully.")
         return redirect('create_team', join_code=course.join_code)
 
     # GET request show the empty form
     return render(request, "course/create_team.html", {
         "course": course,
-        "students": course.students.all()
+        "students": available_students
     })
 
 @login_required
@@ -310,21 +330,31 @@ def draft_questions(request, join_code, course_form_id):
             return HttpResponseRedirect(f"{request.path}?scroll={scroll_target}")
         
         elif action == 'publish':
-            course_form.state = 'published'
+            all_teams = Team.objects.filter(course=course)
+            course_form.teams.set(all_teams)
+
+            course_form.state = CourseForm.PUBLISHED
             course_form.save()
-            students = CustomUser.objects.filter(teams__course_forms=course_form).distinct()
+
+            students = CustomUser.objects.filter(
+                teams__in=all_teams
+            ).distinct()
             for student in students:
                 subject = f"New Form Published: '{course_form.name}' in {course.code}"
                 message = (
-                f"Hello,\n\n"
-                f"A new form \"{course_form.name}\" has been published in your course \"{course.title}\".\n\n"
-                f"Due Date: {course_form.due_date.strftime('%b %d')} at {course_form.due_time.strftime('%I:%M %p')}\n\n"
-                f"Please visit the course page to fill out the form.\n\n"
-                f"Thank you!"
+                    f"Hello,\n\n"
+                    f"A new form \"{course_form.name}\" has been published in your course \"{course.title}\".\n\n"
+                    f"Due Date: {course_form.due_date.strftime('%b %d')} "
+                    f"at {course_form.due_time.strftime('%I:%M %p')}\n\n"
+                    f"Please visit the course page to fill out the form.\n\n"
+                    f"Thank you!"
                 )
-                from_email = settings.DEFAULT_FROM_EMAIL
-                recipient_list = [student.email]
-                send_mail(subject, message, from_email, recipient_list)
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [student.email],
+                )
             messages.success(request, f"Form '{course_form.name}' published and notifications sent.")
             return redirect('course_detail', join_code=join_code)
         
@@ -379,20 +409,16 @@ def delete_form(request, join_code, course_form_id):
     course_form = get_object_or_404(CourseForm, pk=course_form_id)
     name = course_form.name
 
-    course_form.delete()
-
-
-
-    # First delete responses (they depend on questions)
+    # 1) Delete all responses and questions
     LikertResponse.objects.filter(likert__course_form=course_form).delete()
     OpenEndedResponse.objects.filter(open_ended__course_form=course_form).delete()
-
-    # Then delete the questions
     course_form.likert_questions.all().delete()
     course_form.open_ended_questions.all().delete()
 
-    messages.success(request, f"{name} has been deleted.")
+    # 2) Now delete the form itself
+    course_form.delete()
 
+    messages.success(request, f"{name} has been deleted.")
     return redirect('create_form', join_code=join_code)
 
 # @login_required

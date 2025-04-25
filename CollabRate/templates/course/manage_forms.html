@@ -3,198 +3,214 @@
 {% load static %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'course/manage_forms.css' %}">
-    <link rel="stylesheet" href="{% static 'course/course_landing.css' %}">
-    <link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
-    
-    <style>
-        .color-select {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .color-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .color-box {
-            width: 30px;
-            height: 30px;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
+<link rel="stylesheet" href="{% static 'course/manage_forms.css' %}">
+<link rel="stylesheet" href="{% static 'course/course_landing.css' %}">
+<link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
+
+<style>
+    .color-select {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .color-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .color-box {
+        width: 30px;
+        height: 30px;
+        border: none;
+        cursor: pointer;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="d-flex">
-        {% include "course/sidenav.html" %}
+    {% include "course/sidenav.html" %}
 
-        <div class="w-90 p-4 d-flex flex-column">
-            <div style="flex: 0 0  8.5%;">
-                <div class="pb-3">
-                    <h1>
-                        {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> {% if form_expired %}Review Responses{% elif course_form %}Edit Form{% else %}Create Form{% endif %}
-                    </h1>
-                </div>
-                <hr class="m-0" style="opacity: 100%;">
+    <div class="w-90 p-4 d-flex flex-column">
+        <div style="flex: 0 0  8.5%;">
+            <div class="pb-3">
+                <h1>
+                    {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> {% if form_expired%}Review Responses{% elif course_form %}Edit Form{% else %}Create Form{% endif %}
+                </h1>
             </div>
-            <div class="d-flex flex-row" style="flex: 0 0 91.5%;">
-                <div class="w-70 p-4 me-5 custom-scroll" style="overflow-y: auto; max-height: 75vh; margin-top: 2.5vh;">
-                    {% if course_form.state == "released" %}
-                    <p>This form's results have been released to your students. Overview:</p>
+            <hr class="m-0" style="opacity: 100%;">
+        </div>
+        <div class="d-flex flex-row" style="flex: 0 0 91.5%;">
+            <div class="w-70 p-4 me-5 custom-scroll" style="overflow-y: auto; max-height: 75vh; margin-top: 2.5vh;">
+                {% if course_form.state == "released" %}
+                <p>This form's results have been released to your students. Overview:</p>
 
-                    {% elif form_expired %}
-                    <p>Your published form's due date has passed. Please review student responses and proceed to releasing grades.</p>
-                    
+                {% elif form_expired %}
+                <p>Your published form's due date has passed. Please review student responses and proceed to releasing
+                    grades.</p>
+
                     {% if course.teams.all %}
                     <div class="accordion" id="teamsAccordion">
                         {% for team in course.teams.all %}
                         <div class="accordion-item mb-3">
                             <h2 class="accordion-header" id="headingTeam{{ team.id }}">
-                                <button 
-                                    class="accordion-button collapsed" 
-                                    type="button" 
-                                    data-bs-toggle="collapse" 
-                                    data-bs-target="#collapseTeam{{ team.id }}" 
-                                    aria-expanded="false" 
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseTeam{{ team.id }}" aria-expanded="false"
                                     aria-controls="collapseTeam{{ team.id }}">
                                     {{ team.name }}
                                 </button>
                             </h2>
-                            <div 
-                                id="collapseTeam{{ team.id }}" 
-                                class="accordion-collapse collapse" 
-                                aria-labelledby="headingTeam{{ team.id }}" 
-                                data-bs-parent="#teamsAccordion">
+                            <div id="collapseTeam{{ team.id }}" class="accordion-collapse collapse"
+                                aria-labelledby="headingTeam{{ team.id }}" data-bs-parent="#teamsAccordion">
                                 <div class="accordion-body">
-                                    
+
                                     <div class="accordion" id="membersAccordion{{ team.id }}">
                                         {% for member in team.students.all %}
                                         <div class="accordion-item mb-2">
                                             <h2 class="accordion-header" id="headingMember{{ member.id }}">
-                                                <button 
-                                                    class="accordion-button collapsed" 
-                                                    type="button" 
-                                                    data-bs-toggle="collapse" 
-                                                    data-bs-target="#collapseMember{{ member.id }}" 
-                                                    aria-expanded="false" 
+                                                <button class="accordion-button collapsed" type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#collapseMember{{ member.id }}" aria-expanded="false"
                                                     aria-controls="collapseMember{{ member.id }}">
                                                     {{ member.username }}'s Feedback
                                                 </button>
                                             </h2>
-                                            <div 
-                                                id="collapseMember{{ member.id }}" 
-                                                class="accordion-collapse collapse" 
-                                                aria-labelledby="headingMember{{ member.id }}" 
+                                            <div id="collapseMember{{ member.id }}" class="accordion-collapse collapse"
+                                                aria-labelledby="headingMember{{ member.id }}"
                                                 data-bs-parent="#membersAccordion{{ team.id }}">
                                                 <div class="accordion-body">
-                    
+
                                                     <!-- Likert Questions -->
                                                     {% if likert_questions %}
                                                     <div class="mt-3">
                                                         <h6>Likert Scale Questions</h6>
                                                         <ul>
                                                             {% for question in likert_questions %}
-                                                                <li style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 1rem; margin-bottom: 1rem;">
-                                                                    <strong>{{ question.question }}</strong>
-                                                        
-                                                                    {% with responses=question.responses.all %}
-                                                                        {% if responses %}
-                                                                            <ul style="margin-top: 1rem;">
-                                                                                {% for response in responses %}
-                                                                                    {% if response.evaluee == member %}
-                                                                                        <li style="margin-bottom: 0.5rem;">
-                                                                                            {% if response.evaluator == member %}
-                                                                                            <div>Self-evaluation:</div>
-                                                                                            {% else %}
-                                                                                            <div>Response by {{ response.evaluator.username }}:</div>
-                                                                                            {% endif %}
+                                                            <li
+                                                                style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 1rem; margin-bottom: 1rem;">
+                                                                <strong>{{ question.question }}</strong>
 
-                                                                                            {% if response.answer == 0 %}
-                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
-                                                                                                    <div style="background-color: {{ course_form.color_1 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                                                    <span>{{ question.option_1 }}</span>
-                                                                                                </div>
-                                                                                            {% elif response.answer == 1 %}
-                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
-                                                                                                    <div style="background-color: {{ course_form.color_2 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                                                    <span>{{ question.option_2 }}</span>
-                                                                                                </div>
-                                                                                            {% elif response.answer == 2 %}
-                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
-                                                                                                    <div style="background-color: {{ course_form.color_3 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                                                    <span>{{ question.option_3 }}</span>
-                                                                                                </div>
-                                                                                            {% elif response.answer == 3 %}
-                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
-                                                                                                    <div style="background-color: {{ course_form.color_4 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                                                    <span>{{ question.option_4 }}</span>
-                                                                                                </div>
-                                                                                            {% elif response.answer == 4 %}
-                                                                                                <div style="display: flex; align-items: center; gap: 4px;">
-                                                                                                    <div style="background-color: {{ course_form.color_5 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;"></div>
-                                                                                                    <span>{{ question.option_5 }}</span>
-                                                                                                </div>
-                                                                                            {% endif %}
-                                                                                        </li>
-                                                                                    {% endif %}
-                                                                                {% endfor %}
-                                                                            </ul>
+                                                                {% with responses=question.responses.all %}
+                                                                {% if responses %}
+                                                                <ul style="margin-top: 1rem;">
+                                                                    {% for response in responses %}
+                                                                    {% if response.evaluee == member %}
+                                                                    <li style="margin-bottom: 0.5rem;">
+                                                                        {% if response.evaluator == member %}
+                                                                        <div>Self-evaluation:</div>
                                                                         {% else %}
-                                                                            <p style="margin-top: 0.5rem;">No responses yet for this question.</p>
+                                                                        <div>Response by {{ response.evaluator.username }}:
+                                                                        </div>
                                                                         {% endif %}
-                                                                    {% endwith %}
-                                                                </li>
+
+                                                                        {% if response.answer == 0 %}
+                                                                        <div
+                                                                            style="display: flex; align-items: center; gap: 4px;">
+                                                                            <div
+                                                                                style="background-color: {{ course_form.color_1 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
+                                                                            </div>
+                                                                            <span>{{ question.option_1 }}</span>
+                                                                        </div>
+                                                                        {% elif response.answer == 1 %}
+                                                                        <div
+                                                                            style="display: flex; align-items: center; gap: 4px;">
+                                                                            <div
+                                                                                style="background-color: {{ course_form.color_2 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
+                                                                            </div>
+                                                                            <span>{{ question.option_2 }}</span>
+                                                                        </div>
+                                                                        {% elif response.answer == 2 %}
+                                                                        <div
+                                                                            style="display: flex; align-items: center; gap: 4px;">
+                                                                            <div
+                                                                                style="background-color: {{ course_form.color_3 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
+                                                                            </div>
+                                                                            <span>{{ question.option_3 }}</span>
+                                                                        </div>
+                                                                        {% elif response.answer == 3 %}
+                                                                        <div
+                                                                            style="display: flex; align-items: center; gap: 4px;">
+                                                                            <div
+                                                                                style="background-color: {{ course_form.color_4 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
+                                                                            </div>
+                                                                            <span>{{ question.option_4 }}</span>
+                                                                        </div>
+                                                                        {% elif response.answer == 4 %}
+                                                                        <div
+                                                                            style="display: flex; align-items: center; gap: 4px;">
+                                                                            <div
+                                                                                style="background-color: {{ course_form.color_5 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
+                                                                            </div>
+                                                                            <span>{{ question.option_5 }}</span>
+                                                                        </div>
+                                                                        {% endif %}
+                                                                    </li>
+                                                                    {% endif %}
+                                                                    {% endfor %}
+                                                                </ul>
+                                                                {% else %}
+                                                                <p style="margin-top: 0.5rem;">No responses yet for this
+                                                                    question.</p>
+                                                                {% endif %}
+                                                                {% endwith %}
+                                                            </li>
                                                             {% empty %}
-                                                                <li>No likert questions added.</li>
+                                                            <li>No likert questions added.</li>
                                                             {% endfor %}
                                                         </ul>
-                                                        
-                                                        
+
+
                                                     </div>
                                                     {% endif %}
-                    
+
                                                     <!-- Open-ended Questions -->
                                                     {% if open_ended_questions %}
                                                     <div class="mt-3">
                                                         <h6>Open-Ended Questions</h6>
                                                         <i class="fa-solid fa-exclamation-circle me-2"></i>
-                                                        <small class="text-muted">You may edit open responses to filter names or inappropriate responses.</small>
+                                                        <small class="text-muted">You may edit open responses to filter
+                                                            names or inappropriate responses.</small>
                                                         <ul>
                                                             {% for question in open_ended_questions %}
-                                                                <li style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
-                                                                    {{ question.question }}
-                                                                </li>
-                                                                {% for response in question.responses.all %}
-                                                                    {% if response.evaluee == member %}
-                                                                    <div id="response-{{ response.id }}">
-                                                                        <form id="response-form-{{ response.id }}" class="response-form" method="post" action="{% url 'update_open_ended_response' course_form.course.join_code course_form.id response.id %}">
-                                                                            {% csrf_token %}
-                                                                            <p>Response by {{ response.evaluator.username }}:</p>
-                                                                            <textarea name="answer" rows="2" cols="25">{{ response.answer }}</textarea>
-                                                                            <button type="submit">Save</button>
-                                                                        </form>
-                                                                        <div class="response-message" style="color: green; display: none;"></div> <!-- Success message -->
-                                                                    </div>
-                                                                    
-                                                                    {% endif %}
-                                                                {% empty %}
-                                                                    <li>No responses yet for this question.</li>
-                                                                {% endfor %}
+                                                            <li
+                                                                style="font-size: 18px; color: #3D5A80; background-color: #F2F0EF; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                                                                {{ question.question }}
+                                                            </li>
+                                                            {% for response in question.responses.all %}
+                                                            {% if response.evaluee == member %}
+                                                            <div id="response-{{ response.id }}">
+                                                                <form id="response-form-{{ response.id }}"
+                                                                    class="response-form" method="post"
+                                                                    action="{% url 'update_open_ended_response' course_form.course.join_code course_form.id response.id %}">
+                                                                    {% csrf_token %}
+                                                                    <p>Response by {{ response.evaluator.username }}:</p>
+                                                                    <textarea name="answer" rows="2"
+                                                                        cols="25">{{ response.answer }}</textarea>
+                                                                    <button type="submit">Save</button>
+                                                                </form>
+                                                                <div class="response-message"
+                                                                    style="color: green; display: none;"></div>
+                                                                <!-- Success message -->
+                                                            </div>
+
+                                                            {% endif %}
+                                                            {% empty %}
+                                                            <li>No responses yet for this question.</li>
+                                                            {% endfor %}
                                                             {% endfor %}
                                                         </ul>
-                                                        
+
                                                     </div>
                                                     {% endif %}
-                    
+
                                                 </div>
                                             </div>
                                         </div>
                                         {% endfor %}
                                     </div>
-                    
+
                                 </div>
                             </div>
                         </div>
@@ -206,7 +222,7 @@
                     </div>
                     {% endif %}
 
-                    <form method="POST">
+                <form method="POST">
                     {% csrf_token %}
                     <div class="text-end mt-4">
                         <button type="submit" name="action" value="release" class="btn btn-primary px-4 py-2"
@@ -214,160 +230,171 @@
                             Release Results to Students
                         </button>
                     </div>
-                    </form>
+                </form>
 
-                    {% else %}
-                    <div class="content">
-                        <form method="post" action="{% if course_form %}{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}{% else %}{% url 'create_form' join_code=course.join_code %}{% endif %}">
-                            {% csrf_token %}
-                            <div class="title-edit-container m-5">
-                                <div class="title-input-wrapper">
-                                <input 
-                                    type="text" 
-                                    id="peerEvalTitle" 
-                                    class="title-input" 
-                                    placeholder="Untitled Peer Evaluation Form"
-                                    name="form_name"
+                {% else %}
+                <div class="content">
+                    <form method="post"
+                        action="{% if course_form %}{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}{% else %}{% url 'create_form' join_code=course.join_code %}{% endif %}">
+                        {% csrf_token %}
+                        <div class="title-edit-container m-5">
+                            <div class="title-input-wrapper">
+                                <input type="text" id="peerEvalTitle" class="title-input"
+                                    placeholder="Untitled Peer Evaluation Form" name="form_name"
                                     value="{% if course_form %}{{ course_form.name }}{% else %}{% endif %}">
                                 <i class="fa-solid fa-pencil pencil-icon" aria-hidden="true"></i>
-                                </div>
-                            </div> 
-                            <div class="additional-controls my-4 ps-5">
-                                <div class="additional-controls-gap form-check form-switch mb-3 d-flex align-items-center p-0">
-                                    <div class="d-flex flex-column">
-                                        <label class="form-label" for="selfEvaluateToggle">
-                                            Require that Students Self-Evaluate
-                                        </label>
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="fa-solid fa-exclamation-circle me-2"></i>
-                                            <small class="text-muted">Each Student Must Assess their own Performance</small>
-                                        </div>
-                                    </div>
-                                    <label class="toggle-switch">
-                                        <input 
-                                            type="checkbox" 
-                                            id="selfEvaluateToggle" 
-                                            name="self_evaluate" 
-                                            {% if course_form and course_form.self_evaluate %}checked{% endif %}
-                                        >
-                                        <div class="toggle-switch-background">
-                                        <div class="toggle-switch-handle"></div>
-                                        </div>
+                            </div>
+                        </div>
+                        <div class="additional-controls my-4 ps-5">
+                            <div
+                                class="additional-controls-gap form-check form-switch mb-3 d-flex align-items-center p-0">
+                                <div class="d-flex flex-column">
+                                    <label class="form-label" for="selfEvaluateToggle">
+                                        Require that Students Self-Evaluate
                                     </label>
-                                </div>
-                            </div> 
-                            <div class="additional-controls my-4 ps-5">
-                                <!-- Open-Ended Questions Counter -->
-                                <div class="additional-controls-gap d-flex align-items-center mb-1">
-                                    <label class="form-label">
-                                        Open Ended Questions
-                                    </label>
-                                    <div class="quantity-counter d-flex align-items-center">
-                                        <!-- Decrement Button -->
-                                        <button type="button" class="circle-btn decrement-btn" onclick="decrementCounter('openEndedCounter', 'num_open_ended')">
-                                            &minus;
-                                        </button>
-                                    
-                                        <!-- Display the quantity -->
-                                        <span id="openEndedCounter" class="mx-2 d-flex justify-content-center counter-ui">
-                                            {% if course_form %}{{ course_form.num_open_ended }}{% else %}1{% endif %}
-                                        </span>
-                                    
-                                        <!-- Increment Button -->
-                                        <button type="button" class="circle-btn increment-btn" onclick="incrementCounter('openEndedCounter', 'num_open_ended')">
-                                            &plus;
-                                        </button>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fa-solid fa-exclamation-circle me-2"></i>
+                                        <small class="text-muted">Each Student Must Assess their own Performance</small>
                                     </div>
                                 </div>
-                                <!-- Hidden input field to send the value via the form post request -->
-                                <input type="number" id="num_open_ended" name="num_open_ended" class="form-control d-none" required min="0" step="1" 
-                                    value="{% if course_form %}{{ course_form.num_open_ended }}{% else %}1{% endif %}">
+                                <label class="toggle-switch" for="selfEvaluateToggle">
+                                    <!-- hidden by CSS but still focusable/clickable -->
+                                    <input
+                                      type="checkbox"
+                                      id="selfEvaluateToggle"
+                                      name="self_evaluate"
+                                      value="True"
+                                      hidden
+                                      {% if course_form and course_form.self_evaluate %}checked{% endif %}
+                                    />
+                                  
+                                    <!-- your custom UI -->
+                                    <div class="toggle-switch-background">
+                                      <div class="toggle-switch-handle"></div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="additional-controls my-4 ps-5">
+                            <!-- Open-Ended Questions Counter -->
+                            <div class="additional-controls-gap d-flex align-items-center mb-1">
+                                <label class="form-label">
+                                    Open Ended Questions
+                                </label>
+                                <div class="quantity-counter d-flex align-items-center">
+                                    <!-- Decrement Button -->
+                                    <button type="button" class="circle-btn decrement-btn"
+                                        onclick="decrementCounter('openEndedCounter', 'num_open_ended')">
+                                        &minus;
+                                    </button>
 
-                                <!-- Likert Scale Questions Counter -->
-                                <div class="additional-controls-gap d-flex align-items-center mb-4">
-                                    <label class="form-label">
-                                        Likert Scale Questions
-                                    </label>
-                                    <div class="quantity-counter d-flex align-items-center">
-                                        <!-- Decrement Button -->
-                                        <button type="button" class="circle-btn decrement-btn" onclick="decrementCounter('likertCounter', 'num_likert')">
-                                            &minus;
-                                        </button>
-                                    
-                                        <!-- Display the quantity -->
-                                        <span id="likertCounter" class="mx-2 d-flex justify-content-center counter-ui">
-                                            {% if course_form %}{{ course_form.num_likert }}{% else %}3{% endif %}
-                                        </span>
-                                    
-                                        <!-- Increment Button -->
-                                        <button type="button" class="circle-btn increment-btn" onclick="incrementCounter('likertCounter', 'num_likert')">
-                                            &plus;
-                                        </button>
-                                    </div>
-                                </div>
-                                <!-- Hidden input field to send the value via the form post request -->
-                                <input type="number" id="num_likert" name="num_likert" class="form-control d-none" required min="0" step="1" 
-                                    value="{% if course_form %}{{ course_form.num_likert }}{% else %}3{% endif %}">
+                                    <!-- Display the quantity -->
+                                    <span id="openEndedCounter" class="mx-2 d-flex justify-content-center counter-ui">
+                                        {% if course_form %}{{ course_form.num_open_ended }}{% else %}1{% endif %}
+                                    </span>
 
-                                <label class="form-label">Likert Color Range</label>
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fa-solid fa-exclamation-circle me-2"></i>
-                                    <small class="text-muted">Styling will be Applied across all Likert Questions</small>
-                                </div>
-                                <div id="customColorPickerBar">
-                                    <!-- Each input is a color picker with its default value -->
-                                    <div class="color-picker-item">
-                                        <input type="color" id="picker1" name="color_1" class="custom-color-input"
-                                            value="{% if course_form %}{{ course_form.color_1 }}{% else %}{{ default_colors.color_1 }}{% endif %}">
-                                        <small class="text-muted">1</small>
-                                    </div>
-                                    <div class="color-picker-item">
-                                        <input type="color" id="picker2" name="color_2" class="custom-color-input" 
-                                            value="{% if course_form %}{{ course_form.color_2 }}{% else %}{{ default_colors.color_2 }}{% endif %}">
-                                        <small class="text-muted">2</small>
-                                    </div>
-                                    <div class="color-picker-item">
-                                        <input type="color" id="picker3" name="color_3" class="custom-color-input" 
-                                            value="{% if course_form %}{{ course_form.color_3 }}{% else %}{{ default_colors.color_3 }}{% endif %}">
-                                        <small class="text-muted">3</small>
-                                    </div>
-                                    <div class="color-picker-item">
-                                        <input type="color" id="picker4" name="color_4" class="custom-color-input" 
-                                            value="{% if course_form %}{{ course_form.color_4 }}{% else %}{{ default_colors.color_4 }}{% endif %}">
-                                        <small class="text-muted">4</small>
-                                    </div>
-                                    <div class="color-picker-item">
-                                        <input type="color" id="picker5" name="color_5" class="custom-color-input" 
-                                            value="{% if course_form %}{{ course_form.color_5 }}{% else %}{{ default_colors.color_5 }}{% endif %}">
-                                        <small class="text-muted">5</small>
-                                    </div>
+                                    <!-- Increment Button -->
+                                    <button type="button" class="circle-btn increment-btn"
+                                        onclick="incrementCounter('openEndedCounter', 'num_open_ended')">
+                                        &plus;
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <!-- Time picker slider HTML inserted directly above progress-step-container -->
-                            <div class="d-flex mt-5 ps-5 flex-column">
-                                <label class="form-label">Select Due Date</label>
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fa-solid fa-exclamation-circle me-2"></i>
-                                    <small class="text-muted">Student Responses May be Manually Published after the Due Date</small>
-                                </div>
-                                {% include "course/calendar.html" %}
-                            </div>
+                            <!-- Hidden input field to send the value via the form post request -->
+                            <input type="number" id="num_open_ended" name="num_open_ended" class="form-control d-none"
+                                required min="0" step="1"
+                                value="{% if course_form %}{{ course_form.num_open_ended }}{% else %}1{% endif %}">
 
-                            <div class="d-flex align-items-center pe-5 pb-4 justify-content-end next-page-container">
-                                <span>Page 1 of 2</span>
-                                <button type="submit" name="action" value="save" class="progress-step-arrow">
-                                    <i class="fa fa-arrow-right next-page"></i>
-                                </button>
+                            <!-- Likert Scale Questions Counter -->
+                            <div class="additional-controls-gap d-flex align-items-center mb-4">
+                                <label class="form-label">
+                                    Likert Scale Questions
+                                </label>
+                                <div class="quantity-counter d-flex align-items-center">
+                                    <!-- Decrement Button -->
+                                    <button type="button" class="circle-btn decrement-btn"
+                                        onclick="decrementCounter('likertCounter', 'num_likert')">
+                                        &minus;
+                                    </button>
+
+                                    <!-- Display the quantity -->
+                                    <span id="likertCounter" class="mx-2 d-flex justify-content-center counter-ui">
+                                        {% if course_form %}{{ course_form.num_likert }}{% else %}3{% endif %}
+                                    </span>
+
+                                    <!-- Increment Button -->
+                                    <button type="button" class="circle-btn increment-btn"
+                                        onclick="incrementCounter('likertCounter', 'num_likert')">
+                                        &plus;
+                                    </button>
+                                </div>
                             </div>
-                        </form>
-                    </div>
+                            <!-- Hidden input field to send the value via the form post request -->
+                            <input type="number" id="num_likert" name="num_likert" class="form-control d-none" required
+                                min="0" step="1"
+                                value="{% if course_form %}{{ course_form.num_likert }}{% else %}3{% endif %}">
+
+                            <label class="form-label">Likert Color Range</label>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa-solid fa-exclamation-circle me-2"></i>
+                                <small class="text-muted">Styling will be Applied across all Likert Questions</small>
+                            </div>
+                            <div id="customColorPickerBar">
+                                <!-- Each input is a color picker with its default value -->
+                                <div class="color-picker-item">
+                                    <input type="color" id="picker1" name="color_1" class="custom-color-input"
+                                        value="{% if course_form %}{{ course_form.color_1 }}{% else %}{{ default_colors.color_1 }}{% endif %}">
+                                    <small class="text-muted">1</small>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="picker2" name="color_2" class="custom-color-input"
+                                        value="{% if course_form %}{{ course_form.color_2 }}{% else %}{{ default_colors.color_2 }}{% endif %}">
+                                    <small class="text-muted">2</small>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="picker3" name="color_3" class="custom-color-input"
+                                        value="{% if course_form %}{{ course_form.color_3 }}{% else %}{{ default_colors.color_3 }}{% endif %}">
+                                    <small class="text-muted">3</small>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="picker4" name="color_4" class="custom-color-input"
+                                        value="{% if course_form %}{{ course_form.color_4 }}{% else %}{{ default_colors.color_4 }}{% endif %}">
+                                    <small class="text-muted">4</small>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="picker5" name="color_5" class="custom-color-input"
+                                        value="{% if course_form %}{{ course_form.color_5 }}{% else %}{{ default_colors.color_5 }}{% endif %}">
+                                    <small class="text-muted">5</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Time picker slider HTML inserted directly above progress-step-container -->
+                        <div class="d-flex mt-5 ps-5 flex-column">
+                            <label class="form-label">Select Due Date</label>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa-solid fa-exclamation-circle me-2"></i>
+                                <small class="text-muted">Student Responses May be Manually Published after the Due
+                                    Date</small>
+                            </div>
+                            {% include "course/calendar.html" %}
+                        </div>
+
+                        <div class="d-flex align-items-center pe-5 pb-4 justify-content-end next-page-container">
+                            <span>Page 1 of 2</span>
+                            <button type="submit" name="action" value="save" class="progress-step-arrow">
+                                <i class="fa fa-arrow-right next-page"></i>
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="w-30">
-                    {% include "course/view_forms_sidebar.html" %}
-                </div>
+                {% endif %}
+            </div>
+            <div class="w-30">
+                {% include "course/view_forms_sidebar.html" %}
             </div>
         </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -375,13 +402,13 @@
 
 <script>
     // Wait for the DOM to be ready
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         // Get all forms with the class 'response-form'
         const forms = document.querySelectorAll('.response-form');
 
         // Loop over each form
-        forms.forEach(function(form) {
-            form.addEventListener('submit', function(event) {
+        forms.forEach(function (form) {
+            form.addEventListener('submit', function (event) {
                 event.preventDefault(); // Prevent the default form submission
 
                 // Get the form data
@@ -395,19 +422,19 @@
                         'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value,
                     },
                 })
-                .then(response => response.json())
-                .then(data => {
-                    // Handle the response from the server (assuming JSON response)
-                    if (data.success) {
-                        // Update the response text or show a success message
-                        const messageDiv = form.querySelector('.response-message');
-                        messageDiv.style.display = 'block';
-                        messageDiv.innerHTML = 'Response saved successfully!';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        // Handle the response from the server (assuming JSON response)
+                        if (data.success) {
+                            // Update the response text or show a success message
+                            const messageDiv = form.querySelector('.response-message');
+                            messageDiv.style.display = 'block';
+                            messageDiv.innerHTML = 'Response saved successfully!';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
             });
         });
     });
@@ -416,37 +443,37 @@
 
 <script>
     function updateTime() {
-      let rawHour = parseInt(document.getElementById("hour-slider").value, 10);
-      const minuteVal = parseInt(document.getElementById("minute-slider").value, 10);
+        let rawHour = parseInt(document.getElementById("hour-slider").value, 10);
+        const minuteVal = parseInt(document.getElementById("minute-slider").value, 10);
 
-      if (rawHour === 24) {
-        rawHour = 0;
-      }
+        if (rawHour === 24) {
+            rawHour = 0;
+        }
 
-      const period = rawHour < 12 ? "AM" : "PM";
+        const period = rawHour < 12 ? "AM" : "PM";
 
-      let hour12 = rawHour % 12;
-      if (hour12 === 0) {
-        hour12 = 12;
-      }
+        let hour12 = rawHour % 12;
+        if (hour12 === 0) {
+            hour12 = 12;
+        }
 
-      const minuteStr = minuteVal < 10 ? "0" + minuteVal : minuteVal;
+        const minuteStr = minuteVal < 10 ? "0" + minuteVal : minuteVal;
 
-      document.getElementById("time-display").textContent = hour12 + ":" + minuteStr;
-      document.getElementById("am-pm-selector").textContent = period;
+        document.getElementById("time-display").textContent = hour12 + ":" + minuteStr;
+        document.getElementById("am-pm-selector").textContent = period;
 
-      const hourHidden = rawHour < 10 ? "0" + rawHour : rawHour;
-      document.getElementById("due_time").value = hourHidden + ":" + minuteStr;
+        const hourHidden = rawHour < 10 ? "0" + rawHour : rawHour;
+        document.getElementById("due_time").value = hourHidden + ":" + minuteStr;
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-      const dueTimeInput = document.getElementById("due_time");
-      if (dueTimeInput && dueTimeInput.value) {
-        const [h, m] = dueTimeInput.value.split(":");
-        document.getElementById("hour-slider").value = parseInt(h, 10);
-        document.getElementById("minute-slider").value = parseInt(m, 10);
-      }
-      updateTime();      
+    document.addEventListener("DOMContentLoaded", function () {
+        const dueTimeInput = document.getElementById("due_time");
+        if (dueTimeInput && dueTimeInput.value) {
+            const [h, m] = dueTimeInput.value.split(":");
+            document.getElementById("hour-slider").value = parseInt(h, 10);
+            document.getElementById("minute-slider").value = parseInt(m, 10);
+        }
+        updateTime();
     });
 
     function incrementCounter(displayID, hiddenInputID) {

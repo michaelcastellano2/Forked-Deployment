@@ -6,6 +6,7 @@ urlpatterns = [
 
     path('<str:join_code>/groups/', views.groups, name='groups'),
     path('<str:join_code>/group/create/', views.create_team, name='create_team'),
+    path('<str:join_code>/group/delete/<int:team_id>/', views.delete_team, name='delete_team'),
 
     path('<str:join_code>/form/create/', views.create_form, name='create_form'),
     path('<str:join_code>/form/<int:course_form_id>/edit/info/', views.edit_info, name='edit_info'),
