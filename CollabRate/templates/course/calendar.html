@@ -1,7 +1,7 @@
 {% load static %}
 {% block head %}
-    <link rel="stylesheet" href="{% static 'course/calendar.css' %}">
-    <link rel="stylesheet" href="{% static 'course/timepicker.css' %}">
+<link rel="stylesheet" href="{% static 'course/calendar.css' %}">
+<link rel="stylesheet" href="{% static 'course/timepicker.css' %}">
 {% endblock %}
 
 <div class="calendar">
@@ -35,9 +35,9 @@
 </div>
 
 <input type="hidden" id="due_date" name="due_date" required
-           value="{% if course_form and course_form.due_date %}{{ course_form.due_date|date:'Y-m-d' }}{% else %}{% now 'Y-m-d' %}{% endif %}">
+    value="{% if course_form and course_form.due_date %}{{ course_form.due_date|date:'Y-m-d' }}{% else %}{% now 'Y-m-d' %}{% endif %}">
 
- <input type="hidden" id="due_time" name="due_time" required
+<input type="hidden" id="due_time" name="due_time" required
     value="{% if course_form and course_form.due_time %}{{ course_form.due_time|time:'H:i' }}{% else %}23:55{% endif %}">
 
 <script>
@@ -71,24 +71,24 @@
         let datesHTML = '';
 
         if (firstDayIndex > 0) {
-        const prevLastDay = new Date(currentYear, currentMonth, 0).getDate();
-        for (let i = firstDayIndex; i > 0; i--) {
-            const dateNumber = prevLastDay - i + 1;
-            datesHTML += `<div class="date inactive">${dateNumber}</div>`;
-        }
+            const prevLastDay = new Date(currentYear, currentMonth, 0).getDate();
+            for (let i = firstDayIndex; i > 0; i--) {
+                const dateNumber = prevLastDay - i + 1;
+                datesHTML += `<div class="date inactive">${dateNumber}</div>`;
+            }
         }
 
         for (let i = 1; i <= totalDays; i++) {
-        const date = new Date(currentYear, currentMonth, i);
-        const activeClass = date.toDateString() === selectedDate.toDateString() ? 'active' : '';
-        datesHTML += `<div class="date ${activeClass}" data-day="${i}">${i}</div>`;
+            const date = new Date(currentYear, currentMonth, i);
+            const activeClass = date.toDateString() === selectedDate.toDateString() ? 'active' : '';
+            datesHTML += `<div class="date ${activeClass}" data-day="${i}">${i}</div>`;
         }
 
         const remainingDays = 7 - ((firstDayIndex + totalDays) % 7);
         if (remainingDays < 7) {
-        for (let i = 1; i <= remainingDays; i++) {
-            datesHTML += `<div class="date inactive">${i}</div>`;
-        }
+            for (let i = 1; i <= remainingDays; i++) {
+                datesHTML += `<div class="date inactive">${i}</div>`;
+            }
         }
 
         datesElement.innerHTML = datesHTML;
@@ -106,22 +106,21 @@
 
     datesElement.addEventListener('click', (e) => {
         if (e.target.classList.contains('date') && !e.target.classList.contains('inactive')) {
-        const currentActive = datesElement.querySelector('.active');
-        if (currentActive) {
-            currentActive.classList.remove('active');
-        }
-        e.target.classList.add('active');
+            const currentActive = datesElement.querySelector('.active');
+            if (currentActive) {
+                currentActive.classList.remove('active');
+            }
+            e.target.classList.add('active');
 
-        const clickedDay = parseInt(e.target.getAttribute('data-day'), 10);
-        selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), clickedDay);
-        
-        if (dueDateInput) {
-            dueDateInput.value = selectedDate.toISOString().split('T')[0];
-        }
-        console.log("Selected date:", selectedDate);
+            const clickedDay = parseInt(e.target.getAttribute('data-day'), 10);
+            selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), clickedDay);
+
+            if (dueDateInput) {
+                dueDateInput.value = selectedDate.toISOString().split('T')[0];
+            }
+            console.log("Selected date:", selectedDate);
         }
     });
 
     updateCalendar();
 </script>
-          
