@@ -41,7 +41,21 @@
         </div>
         <form method="post" action="">
             {% csrf_token %}
-            <!-- Likert Scale Questions -->
+
+            {# Peer selector (only if not self_evaluate) #}
+            {% if not form_obj.self_evaluate %}
+                <div class="mb-3">
+                    <label for="evaluee_id" class="form-label"><strong>Select student to evaluate:</strong></label>
+                    <select name="evaluee_id" id="evaluee_id" class="form-select" required>
+                            <option value="" selected disabled>-- choose peer --</option>
+                            {% for peer in potential_peers %}
+                                <option value="{{ peer.id }}">{{ peer.get_full_name|default:peer.username }}</option>
+                            {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+
+            <!-- Likert Scale -->
             <div class="question-section">
                 <h3>Likert Scale Questions</h3>
                 {% for likert in likert_questions %}
@@ -75,7 +89,7 @@
                 {% endfor %}
             </div>
 
-            <!-- Open-Ended Questions -->
+            <!-- Open-Ended  -->
             <div class="question-section">
                 <h3>Open-Ended Questions</h3>
                 {% for open_q in open_questions %}
