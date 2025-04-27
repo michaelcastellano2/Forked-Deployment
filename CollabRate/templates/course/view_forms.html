@@ -106,29 +106,35 @@
     </div>
     
     <div class="container mt-4" style="width: 100vw; margin-left: 12px;">
-        <h1>
+        <h1 class="pb-3">
             {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> View Forms
         </h1>
+        <hr class="m-0" style="opacity: 100%;">
 
-        <div class="p-3">
-            <div class="list-group d-flex flex-column flex-grow-1 overflow-auto" style="max-height: 75vh;">
-
+        <div class="px-3 py-5">
+            <div class="list-group d-flex flex-column flex-grow-1 overflow-auto align-items-center" style="max-height: 72.5vh;">
+                <div class="py-1"></div>
                 {% for form in forms %}
-                <a href="{% url 'edit_info' join_code=course.join_code course_form_id=form.id %}"
+                <!-- <a href="{% url 'edit_info' join_code=course.join_code course_form_id=form.id %}" -->
+                  <a href="{% if form.is_expired %} {% url 'view_form_responses' join_code=course.join_code course_form_id=form.id %} {% else %}{% url 'edit_info' join_code=course.join_code course_form_id=form.id %}{% endif %}"
                     class="list-group-item {% if form.state == 'draft' %}draft{% elif form.state == 'published' %}published{% elif form.state == 'released' %}released{% endif %}">
                     <div class="card-body">
                         <button type="button" class="delete-btn" onclick="deleteForm(event, '{{ form.id }}')">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                         <h5 class="card-title">{% if form.name %}{{ form.name }}{% else %}Untitled Form{% endif %}</h5>
-                        <p class="card-text">
-                            Due: {{ form.due_date|date:"F j, Y" }} at {{ form.due_time|date:"H:i" }}
+                        <p
+                          class="card-text due-datetime"
+                          data-due-datetime="{{ form.due_datetime|date:'c' }}"
+                        >
+                          <!-- will be filled in by JS -->
                         </p>
                     </div>
                 </a>
                 {% empty %}
                 <p>No forms available for this course.</p>
                 {% endfor %}
+                <div class="py-3"></div>
             </div>
         </div>
     </div>
@@ -142,5 +148,31 @@
         window.location.href = "{% url 'delete_form' course.join_code 0 %}".replace("0", formId);
     }
   }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // find every element with that class
+    document.querySelectorAll(".due-datetime").forEach(el => {
+      const iso = el.dataset.dueDatetime;  
+      if (!iso) return;
+
+      const dt = new Date(iso);
+
+      // e.g. “April 30, 2025”
+      const date = dt.toLocaleDateString(undefined, {
+        month: "long",
+        day:   "numeric",
+        year:  "numeric"
+      });
+
+      // e.g. “3:20 PM”
+      const time = dt.toLocaleTimeString(undefined, {
+        hour:   "numeric",
+        minute: "2-digit",
+        hour12: true
+      });
+
+      el.textContent = `Due: ${date} at ${time}`;
+    });
+  });
 </script>
 {% endblock %}

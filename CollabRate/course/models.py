@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator
 from dashboard.models import Course
 from accounts.models import CustomUser
 from datetime import date
+from django.utils import timezone
 
 hex_validator = RegexValidator(
     regex=r'^#(?:[0-9a-fA-F]{3}){1,2}$',
@@ -25,8 +26,11 @@ class CourseForm(models.Model):
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="course_forms")
     name = models.CharField(max_length=255, default="Untitled Form")
-    due_date = models.DateField(null=True, blank=True, default=date.today)
-    due_time = models.TimeField(null=True, blank=True)
+    due_datetime = models.DateTimeField(
+        null=True,
+        blank=True,
+        default=timezone.now,
+    )
     num_likert = models.PositiveIntegerField(default=3)
     num_open_ended = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -10,8 +10,10 @@ from django.http import HttpResponseRedirect
 from django.core.mail import send_mail 
 from django.urls import reverse 
 from django.conf import settings
+from django.utils import timezone
 from datetime import datetime, time
 from django.http import JsonResponse
+from django.db.models import BooleanField, Case, Value, When
 
 @login_required
 def course_detail(request, join_code):
@@ -108,7 +110,18 @@ def create_team(request, join_code):
 @login_required
 def create_form(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
-    forms = CourseForm.objects.filter(course=course)
+    # forms = CourseForm.objects.filter(course=course)
+    now=timezone.now()
+    forms = (CourseForm.objects
+             .filter(course=course)
+             .annotate(
+                is_expired=Case(
+                  When(due_datetime__lt=now, then=Value(True)),
+                  default=Value(False),
+                  output_field=BooleanField(),
+                )
+              )
+    )
 
     if request.user.user_type != CustomUser.PROFESSOR:
         messages.error(request, "Access denied: Professors only.")
@@ -131,8 +144,19 @@ def create_form(request, join_code):
         self_evaluate = "self_evaluate" in request.POST
         num_likert = int(request.POST.get("num_likert", 0))
         num_open_ended = int(request.POST.get("num_open_ended", 0))
-        due_date = request.POST.get("due_date")
-        due_time = request.POST.get("due_time")
+
+        due_dt_str = request.POST.get("due_datetime")
+        print(due_dt_str)
+        due_datetime = None
+        if due_dt_str:
+            try:
+                # expects 'YYYY-MM-DDTHH:MM'
+                due_datetime = datetime.fromisoformat(due_dt_str)
+                print(due_datetime)
+                print(timezone.now())
+            except ValueError:
+                messages.error(request, "Invalid date/time format.")
+                return redirect('create_form', join_code=join_code)
         
         # Get color values from POST request or use default
         color_1 = request.POST.get('color_1', default_colors['color_1'])
@@ -147,8 +171,7 @@ def create_form(request, join_code):
             self_evaluate=self_evaluate,
             num_likert=num_likert,
             num_open_ended=num_open_ended,
-            due_date=due_date,
-            due_time=due_time,
+            due_datetime=due_datetime,
             color_1=color_1,
             color_2=color_2,
             color_3=color_3,
@@ -170,7 +193,17 @@ def create_form(request, join_code):
 def edit_info(request, join_code, course_form_id):
     course = get_object_or_404(Course, join_code=join_code)
     course_form = get_object_or_404(CourseForm, pk=course_form_id)
-    forms = CourseForm.objects.filter(course=course)
+    now=timezone.now()
+    forms = (CourseForm.objects
+             .filter(course=course)
+             .annotate(
+                is_expired=Case(
+                  When(due_datetime__lt=now, then=Value(True)),
+                  default=Value(False),
+                  output_field=BooleanField(),
+                )
+              )
+    )
 
     if request.user.user_type != CustomUser.PROFESSOR:
         messages.error(request, "Access denied: Professors only.")
@@ -195,13 +228,22 @@ def edit_info(request, join_code, course_form_id):
         modified_num_open_ended = int(request.POST.get("num_open_ended", course_form.num_open_ended))
         if modified_num_open_ended < course_form.num_open_ended:
             OpenEnded.objects.filter(course_form=course_form, order__gte=modified_num_open_ended).delete()
+
+        due_dt_str = request.POST.get("due_datetime")
+        due_datetime = None
+        if due_dt_str:
+            try:
+                # expects 'YYYY-MM-DDTHH:MM'
+                due_datetime = datetime.fromisoformat(due_dt_str)
+            except ValueError:
+                messages.error(request, "Invalid date/time format.")
+                return redirect('edit_info', join_code=join_code, course_form_id=course_form_id)
         
         course_form.name = request.POST.get("form_name", course_form.name)
         course_form.self_evaluate = "self_evaluate" in request.POST
         course_form.num_likert = modified_num_likert
         course_form.num_open_ended = modified_num_open_ended
-        course_form.due_date = request.POST.get("due_date", course_form.due_date)
-        course_form.due_time = request.POST.get("due_time", course_form.due_time)
+        course_form.due_datetime = due_datetime
         course_form.color_1 = request.POST.get("color_1", course_form.color_1)
         course_form.color_2 = request.POST.get("color_2", course_form.color_2)
         course_form.color_3 = request.POST.get("color_3", course_form.color_3)
@@ -211,50 +253,61 @@ def edit_info(request, join_code, course_form_id):
 
         action = request.POST.get('action')
     
-        if action == 'release':
-            course_form.state = 'released'
-            course_form.save()
-            print("🔁 POST request received!")
-            '''
-            students = CustomUser.objects.filter(teams__course_forms=course_form).distinct()
-            for student in students:
-                subject = f"Feedback Released: '{course_form.name}' in {course.code}"
-                message = (
-                    f"Hello,\n\n"
-                    f"Feedback for the form \"{course_form.name}\" in your course \"{course.title}\" has been released.\n\n"
-                    f"You can now view your feedback and scores on the course page.\n\n"
-                    f"Thank you!"
-                )
-                from_email = settings.DEFAULT_FROM_EMAIL
-                recipient_list = [student.email]
-                send_mail(subject, message, from_email, recipient_list)
-            '''
-            messages.success(request, f"Form '{course_form.name}' released and notifications sent.")
-            return redirect('course_detail', join_code=join_code)
+        # if action == 'release':
+        #     course_form.state = 'released'
+        #     course_form.save()
+        #     print("🔁 POST request received!")
+        #     '''
+        #     students = CustomUser.objects.filter(teams__course_forms=course_form).distinct()
+        #     for student in students:
+        #         subject = f"Feedback Released: '{course_form.name}' in {course.code}"
+        #         message = (
+        #             f"Hello,\n\n"
+        #             f"Feedback for the form \"{course_form.name}\" in your course \"{course.title}\" has been released.\n\n"
+        #             f"You can now view your feedback and scores on the course page.\n\n"
+        #             f"Thank you!"
+        #         )
+        #         from_email = settings.DEFAULT_FROM_EMAIL
+        #         recipient_list = [student.email]
+        #         send_mail(subject, message, from_email, recipient_list)
+        #     '''
+        #     messages.success(request, f"Form '{course_form.name}' released and notifications sent.")
+        #     return redirect('course_detail', join_code=join_code)
 
         return redirect('draft_questions', join_code=join_code, course_form_id=course_form.pk)
     
-    now = datetime.now()
-    form_expired = False
-    if course_form and course_form.state == "published":
-        due_datetime = datetime.combine(course_form.due_date, course_form.due_time)
-        form_expired = now > due_datetime
+    # form_expired = False
+    # if course_form and course_form.state == "published":
+    #     due_datetime = timezone.make_aware(datetime.combine(course_form.due_date, course_form.due_time))
+    #     print(due_datetime)
+    #     print(now)
+    #     form_expired = now > due_datetime
 
     return render(request, 'course/manage_forms.html', {
         'course': course,
         'default_colors': default_colors,
         'forms': forms,
         'course_form': course_form,
-        'form_expired': form_expired,
-        'likert_questions': course_form.likert_questions.all(),
-        'open_ended_questions': course_form.open_ended_questions.all(),
+        # 'form_expired': form_expired,
+        # 'likert_questions': course_form.likert_questions.all(),
+        # 'open_ended_questions': course_form.open_ended_questions.all(),
     })
 
 @login_required
 def draft_questions(request, join_code, course_form_id):
     course = get_object_or_404(Course, join_code=join_code)
     course_form = get_object_or_404(CourseForm, pk=course_form_id)
-    course_forms = CourseForm.objects.filter(course=course)
+    now=timezone.now()
+    forms = (CourseForm.objects
+             .filter(course=course)
+             .annotate(
+                is_expired=Case(
+                  When(due_datetime__lt=now, then=Value(True)),
+                  default=Value(False),
+                  output_field=BooleanField(),
+                )
+              )
+    )
 
     if request.user.user_type != CustomUser.PROFESSOR:
         messages.error(request, "Access denied: Professors only.")
@@ -340,12 +393,18 @@ def draft_questions(request, join_code, course_form_id):
                 teams__in=all_teams
             ).distinct()
             for student in students:
-                subject = f"New Form Published: '{course_form.name}' in {course.code}"
+                local_dt = timezone.localtime(course_form.due_datetime, timezone.get_current_timezone())
+
+                # 2) Format as “Apr 30 at 03:20 PM”
+                due_date_str = local_dt.strftime('%b %d')
+                due_time_str = local_dt.strftime('%I:%M %p')
+
+                subject = f"New Form Published: '{course_form.name}' in {course_form.course.code}"
                 message = (
                     f"Hello,\n\n"
-                    f"A new form \"{course_form.name}\" has been published in your course \"{course.title}\".\n\n"
-                    f"Due Date: {course_form.due_date.strftime('%b %d')} "
-                    f"at {course_form.due_time.strftime('%I:%M %p')}\n\n"
+                    f"A new form \"{course_form.name}\" has been published in your course "
+                    f"\"{course_form.course.title}\".\n\n"
+                    f"Due: {due_date_str} at {due_time_str}\n\n"
                     f"Please visit the course page to fill out the form.\n\n"
                     f"Thank you!"
                 )
@@ -358,38 +417,91 @@ def draft_questions(request, join_code, course_form_id):
             messages.success(request, f"Form '{course_form.name}' published and notifications sent.")
             return redirect('course_detail', join_code=join_code)
         
-        elif action == 'release':
-            course_form.state = 'released'
-            course_form.save()
-            students = CustomUser.objects.filter(teams__course_forms=course_form).distinct()
-            for student in students:
-                subject = f"Feedback Released: '{course_form.name}' in {course.code}"
-                message = (
-                    f"Hello,\n\n"
-                    f"Feedback for the form \"{course_form.name}\" in your course \"{course.title}\" has been released.\n\n"
-                    f"You can now view your feedback and scores on the course page.\n\n"
-                    f"Thank you!"
-                )
-                from_email = settings.DEFAULT_FROM_EMAIL
-                recipient_list = [student.email]
-                send_mail(subject, message, from_email, recipient_list)
+        # elif action == 'release':
+        #     course_form.state = 'released'
+        #     course_form.save()
+        #     students = CustomUser.objects.filter(teams__course_forms=course_form).distinct()
+        #     for student in students:
+        #         subject = f"Feedback Released: '{course_form.name}' in {course.code}"
+        #         message = (
+        #             f"Hello,\n\n"
+        #             f"Feedback for the form \"{course_form.name}\" in your course \"{course.title}\" has been released.\n\n"
+        #             f"You can now view your feedback and scores on the course page.\n\n"
+        #             f"Thank you!"
+        #         )
+        #         from_email = settings.DEFAULT_FROM_EMAIL
+        #         recipient_list = [student.email]
+        #         send_mail(subject, message, from_email, recipient_list)
 
-            messages.success(request, f"Form '{course_form.name}' released and notifications sent.")
-            return redirect('course_detail', join_code=join_code)
+        #     messages.success(request, f"Form '{course_form.name}' released and notifications sent.")
+        #     return redirect('course_detail', join_code=join_code)
 
     context = {
         'course': course,
         'course_form': course_form,
-        'forms': course_forms,
+        'forms': forms,
         'likert_qs': likert_qs,
         'open_ended_qs': open_ended_qs,
     }
     return render(request, 'course/draft_questions.html', context)
 
+
+@login_required
+def view_form_responses(request, join_code, course_form_id):
+    # 1) Get the course and enforce professor-only access
+    course = get_object_or_404(Course, join_code=join_code)
+    if request.user.user_type != CustomUser.PROFESSOR or course.professor != request.user:
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+
+    # 2) Get the specific form
+    course_form = get_object_or_404(CourseForm, pk=course_form_id, course=course)
+
+    # 3) Build the sidebar list of all forms for this course
+    now=timezone.now()
+    forms = (CourseForm.objects
+             .filter(course=course)
+             .annotate(
+                is_expired=Case(
+                  When(due_datetime__lt=now, then=Value(True)),
+                  default=Value(False),
+                  output_field=BooleanField(),
+                )
+              )
+    )
+
+    # 4) Has the due date/time passed?
+    form_expired = False
+    if course_form.due_datetime:
+        form_expired = timezone.now() > course_form.due_datetime
+
+    # 5) Grab the questions to loop over
+    likert_questions      = course_form.likert_questions.all()
+    open_ended_questions  = course_form.open_ended_questions.all()
+
+    return render(request, 'course/form_responses.html', {
+        'course': course,
+        'forms': forms,
+        'course_form': course_form,
+        'form_expired': form_expired,
+        'likert_questions': likert_questions,
+        'open_ended_questions': open_ended_questions,
+    })
+
 @login_required
 def view_forms(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
-    course_forms = CourseForm.objects.filter(course=course)
+    now=timezone.now()
+    forms = (CourseForm.objects
+             .filter(course=course)
+             .annotate(
+                is_expired=Case(
+                  When(due_datetime__lt=now, then=Value(True)),
+                  default=Value(False),
+                  output_field=BooleanField(),
+                )
+              )
+    )
 
     if request.user.user_type != CustomUser.PROFESSOR:
         messages.error(request, "Access denied: Professors only.")
@@ -401,7 +513,7 @@ def view_forms(request, join_code):
     return render(request, "course/view_forms.html", {
         "join_code": join_code,
         "course": course,
-        'forms': course_forms,
+        'forms': forms,
     })
 
 @login_required

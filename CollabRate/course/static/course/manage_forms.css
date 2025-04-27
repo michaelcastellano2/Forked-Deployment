@@ -343,6 +343,7 @@
   border: none;
   border-radius: 0;          /* Square corners */
   cursor: pointer;
+  padding: 0;
   
   /* Remove default browser appearance */
   -webkit-appearance: none;
@@ -397,3 +398,69 @@
 .w-30 {
   width: 30%;
 }
+
+
+
+
+.previous-page-btn, .next-page-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: black;
+  cursor: pointer;
+}
+
+.previous-page-btn:hover, .next-page-btn:hover {
+  text-decoration: underline;
+}
+
+
+
+.page-navigation-full {
+  width: 100%;
+  position: relative;
+}
+
+.page-navigation {
+  font-size: 1.5rem;
+  font-weight: 500;
+  gap: 1.5rem;
+}
+
+.current-page {
+  text-decoration: underline;
+  padding-bottom: 0.2rem;
+}
+
+.divider {
+  font-weight: 400;
+  font-size: 2rem;
+}
+
+.previous-page-btn, .next-page-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: black;
+  cursor: pointer;
+}
+
+.previous-page-btn:hover, .next-page-btn:hover {
+  text-decoration: underline;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1.5rem;
+  color: black;
+  cursor: pointer;
+}
+
