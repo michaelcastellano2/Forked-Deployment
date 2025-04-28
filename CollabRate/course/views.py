@@ -795,6 +795,10 @@ def answer_form(request, join_code, form_id):
         for student in team.students.exclude(pk=request.user.pk)
     }
 
+    # if self-evaluation is enabled, allow user to evaluate themselves
+    if form_obj.self_evaluate:
+        potential_peers.add(request.user)
+
     # If an evaluee was selected, load their existing answers
     selected_evaluee_id = request.GET.get("evaluee_id")
     existing_likert     = {}
