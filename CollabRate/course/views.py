@@ -464,6 +464,14 @@ def view_form_responses(request, join_code, course_form_id):
     # 2) Get the specific form
     course_form = get_object_or_404(CourseForm, pk=course_form_id, course=course)
 
+    # —— NEW: handle “release” button POST ——
+    if request.method == "POST" and request.POST.get("action") == "release":
+        course_form.state = CourseForm.RELEASED
+        course_form.save(update_fields=["state"])
+        messages.success(request, "Form results have been released.")
+        # Redirect back to this view so the template sees state="released"
+        return redirect('view_form_responses', join_code=join_code, course_form_id=course_form_id)
+
     # 3) Build the sidebar list of all forms for this course
     now=timezone.now()
     forms = (CourseForm.objects
