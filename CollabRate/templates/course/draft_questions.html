@@ -208,15 +208,38 @@
                                 <i class="fa-solid fa-plus" style="font-size: 2rem;"></i>
                             </button>
                         </div>
-                        <div class="d-flex align-items-center pe-5 pb-4 justify-content-start next-page-container">
-                            <a href="{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}"
-                                   class="btn px-4 py-2" style="font-weight: 500;">
-                                   <i class="fa fa-arrow-left next-page"></i>
-                                </a>
-                            <span>Page 2 of 2</span>
+                        <div class="position-relative mt-5 mb-4 page-navigation-full" style="min-height: 50px;">
+                            <!-- Truly centered 1 | 2 navigation -->
+                            <div class="position-absolute top-50 start-50 translate-middle d-flex align-items-center page-navigation">
+                                <a href="{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}" class="previous-page-btn">1</a>
+                                <span class="divider">|</span>
+                                <span class="current-page">2</span>
+                                {% if course_form.state == 'published' %}
+                                    <span class="divider">|</span>
+                                    <a href="{% url 'view_form_responses' join_code=course.join_code course_form_id=course_form.pk %}" class="previous-page-btn">3</a>
+                                {% endif %}
+                            </div>
+                        
+                            <!-- Right-aligned Save/Publish icons -->
+                            <div class="d-flex align-items-center justify-content-end gap-4" style="height: 100%;">
+                                <button type="submit" name="action" value="save" class="icon-btn" id="scroll-save" title="Save Form">
+                                    <i class="fa-regular fa-floppy-disk"></i>
+                                </button>
+                                <span class="divider">|</span>
+                                <button type="submit" name="action" value="publish" class="icon-btn" title="Publish Form" style="padding-right: 5%;">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
                         </div>
+                        
+                        
+                        <!-- <div class="d-flex justify-content-center align-items-center mt-5 mb-4 page-navigation">
+                            <a href="{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}" class="previous-page-btn">1</a>
+                            <span class="divider">|</span>
+                            <span class="current-page">2</span>
+                        </div> -->
                         <!-- Bottom Buttons -->
-                        <div class="text-end mt-4">
+                        <!-- <div class="text-end mt-4">
                             <div class="text-end mt-4">
                                 <a href="{% url 'edit_info' join_code=course.join_code course_form_id=course_form.pk %}"
                                    class="btn btn-warning px-4 py-2" style="font-weight: 500;">
@@ -233,13 +256,7 @@
                                     style="font-weight: 500;">
                                 Publish Form <span class="ms-1">&#x25BC;</span>
                             </button>
-                        </div>
-                        <div class="text-end mt-4">
-                            <button type="submit" name="action" value="release" class="btn btn-primary px-4 py-2"
-                                    style="font-weight: 500;">
-                                Release Form (debug) <span class="ms-1">&#x25BC;</span>
-                            </button>
-                        </div>
+                        </div> -->
                     </form>
                 </div>
             </div>
