@@ -1,5 +1,6 @@
 {% extends 'collabrate/base.html' %}
 {% load static %}
+{% load custom_tags %}
 
 {% block title %}Answer Form{% endblock %}
 
@@ -43,7 +44,7 @@
             {% csrf_token %}
 
             {# Peer selector (only if not self_evaluate) #}
-            {% if not form_obj.self_evaluate %}
+            <!-- {% if not form_obj.self_evaluate %}
                 <div class="mb-3">
                     <label for="evaluee_id" class="form-label"><strong>Select student to evaluate:</strong></label>
                     <select name="evaluee_id" id="evaluee_id" class="form-select" required>
@@ -53,12 +54,57 @@
                             {% endfor %}
                     </select>
                 </div>
+            {% endif %} -->
+            {% if not form_obj.self_evaluate %}
+            <div class="mb-3">
+                <label for="evaluee_id" class="form-label"><strong>Select student to evaluate:</strong></label>
+                <!-- <select
+                name="evaluee_id" id="evaluee_id"
+                class="form-select"
+                onchange="if(this.value) window.location='?evaluee_id='+this.value;"
+                required
+                >
+                <option value="" disabled>-- choose peer --</option>
+                {% for peer in potential_peers %}
+                    <option
+                    value="{{ peer.id }}"
+                    {% if peer.id == selected_evaluee_id %}selected{% endif %}
+                    >
+                    {{ peer.get_full_name|default:peer.username }}
+                    </option>
+                {% endfor %}
+                </select> -->
+                <select
+                name="evaluee_id" id="evaluee_id"
+                class="form-select"
+                onchange="if(this.value) window.location='?evaluee_id='+this.value;"
+                required
+                >
+                <option
+                    value=""
+                    disabled
+                    {% if not selected_evaluee_id %}selected{% endif %}
+                >
+                    -- choose peer --
+                </option>
+
+                {% for peer in potential_peers %}
+                    <option
+                    value="{{ peer.id }}"
+                    {% if peer.id == selected_evaluee_id %}selected{% endif %}
+                    >
+                    {{ peer.get_full_name|default:peer.username }}
+                    </option>
+                {% endfor %}
+                </select>
+
+            </div>
             {% endif %}
 
             <!-- Likert Scale -->
             <div class="question-section">
                 <h3>Likert Scale Questions</h3>
-                {% for likert in likert_questions %}
+                <!-- {% for likert in likert_questions %}
                     <div class="mb-3">
                         <label><strong>{{ forloop.counter }}. {{ likert.question }}</strong></label>
                         <div>
@@ -86,19 +132,64 @@
                     </div>
                 {% empty %}
                     <p>No Likert-scale questions in this form.</p>
+                {% endfor %} -->
+                {% for likert in likert_questions %}
+                <div class="mb-3">
+                    <label><strong>{{ forloop.counter }}. {{ likert.question }}</strong></label>
+                    <div>
+                    {% for val in likert_scale_values %}
+                        <div class="form-check form-check-inline">
+                        <input
+                            class="form-check-input"
+                            type="radio"
+                            name="likert_{{ likert.id }}"
+                            value="{{ val }}"
+                            {% if existing_likert|dict_get:likert.id == val %}checked{% endif %}
+                            {% if not selected_evaluee_id %}required{% endif %}
+                        >
+                        <label class="form-check-label">
+                            {{ likert|get_option:val }}  {# you could write a template filter to map 1→option_1, etc. #}
+                        </label>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
                 {% endfor %}
             </div>
 
             <!-- Open-Ended  -->
             <div class="question-section">
                 <h3>Open-Ended Questions</h3>
-                {% for open_q in open_questions %}
+                <!-- {% for open_q in open_questions %}
                     <div class="mb-3">
                         <label><strong>{{ forloop.counter }}. {{ open_q.question }}</strong></label>
                         <textarea name="open_{{ open_q.id }}" class="form-control" rows="4" required></textarea>
                     </div>
                 {% empty %}
                     <p>No open-ended questions in this form.</p>
+                {% endfor %} -->
+                <!-- {% for open_q in open_questions %}
+                <div class="mb-3">
+                    <label><strong>{{ forloop.counter }}. {{ open_q.question }}</strong></label>
+                    <textarea
+                    name="open_{{ open_q.id }}"
+                    class="form-control"
+                    rows="4"
+                    {% if not selected_evaluee_id %}required{% endif %}
+                    >{{ existing_open|dict_get:open_q.id }}</textarea>
+                </div>
+                {% endfor %} -->
+                {% for open_q in open_questions %}
+                <div class="mb-3">
+                    <label><strong>{{ forloop.counter }}. {{ open_q.question }}</strong></label>
+                    <textarea
+                    name="open_{{ open_q.id }}"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Enter answer here"
+                    {% if not selected_evaluee_id %}required{% endif %}
+                    >{{ existing_open|dict_get:open_q.id|default_if_none:"" }}</textarea>
+                </div>
                 {% endfor %}
             </div>
             <button type="submit" class="btn btn-primary">Submit Answers</button>

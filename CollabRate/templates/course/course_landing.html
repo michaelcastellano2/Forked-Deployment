@@ -13,9 +13,14 @@
 
     {% if user.user_type == "student" %}
     {% if team_forms %}
-    <div class="main-container">
-        <div class="course-header" style="background-color: {{ course.color }};">
-            <b>{{ course.code }}</b> | {{ course.title }}
+    <div class="main-container p-4">
+        <div style="flex: 0 0  8.5%;">
+            <div class="pb-3">
+                <h1>
+                    {{ course.code }} <strong>|</strong> {{ course.title }}
+                </h1>
+            </div>
+            <hr class="m-0 pb-4" style="opacity: 100%;">
         </div>
         {% for grp in team_forms %}
         <h2 class="section-title">Team: {{ grp.team.name }}</h2>

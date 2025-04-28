@@ -17,7 +17,7 @@
         <div style="flex: 0 0 8.5%;">
             <div class="pb-3">
                 <h1>
-                    {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> Draft Questions
+                    {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> Review Responses
                 </h1>
             </div>
             <hr class="m-0" style="opacity: 100%;">
@@ -34,6 +34,10 @@
                     {% elif form_expired %}
                     <p>Your published form's due date has passed. Please review student responses and proceed to releasing
                         grades.</p>
+
+                    {% else %}
+                    <p>Review current student submissions.</p>
+                    {% endif %}
 
                     {% if course.teams.all %}
                     <div class="accordion" id="teamsAccordion">
@@ -88,42 +92,55 @@
                                                                         </div>
                                                                         {% endif %}
 
-                                                                        {% if response.answer == 0 %}
+                                                                        <!-- {% if response.answer == 0 %}
+                                                                        <div style="display: flex; align-items: center; gap: 4px;">
+                                                                            <div
+                                                                                style="background-color: {{ course_form.color_0 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
+                                                                            </div>
+                                                                            <span>{{ question.option_0 }}</span>
+                                                                        </div>
+                                                                        {% elif response.answer == 1 %}
                                                                         <div style="display: flex; align-items: center; gap: 4px;">
                                                                             <div
                                                                                 style="background-color: {{ course_form.color_1 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
                                                                             </div>
                                                                             <span>{{ question.option_1 }}</span>
                                                                         </div>
-                                                                        {% elif response.answer == 1 %}
+                                                                        {% elif response.answer == 2 %}
                                                                         <div style="display: flex; align-items: center; gap: 4px;">
                                                                             <div
                                                                                 style="background-color: {{ course_form.color_2 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
                                                                             </div>
                                                                             <span>{{ question.option_2 }}</span>
                                                                         </div>
-                                                                        {% elif response.answer == 2 %}
+                                                                        {% elif response.answer == 3 %}
                                                                         <div style="display: flex; align-items: center; gap: 4px;">
                                                                             <div
                                                                                 style="background-color: {{ course_form.color_3 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
                                                                             </div>
                                                                             <span>{{ question.option_3 }}</span>
                                                                         </div>
-                                                                        {% elif response.answer == 3 %}
+                                                                        {% elif response.answer == 4 %}
                                                                         <div style="display: flex; align-items: center; gap: 4px;">
                                                                             <div
                                                                                 style="background-color: {{ course_form.color_4 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
                                                                             </div>
                                                                             <span>{{ question.option_4 }}</span>
                                                                         </div>
-                                                                        {% elif response.answer == 4 %}
-                                                                        <div style="display: flex; align-items: center; gap: 4px;">
+                                                                        {% endif %} -->
+                                                                        {% with label=question|get_option:response.answer bg=course_form|get_color:response.answer %}
+                                                                          <div style="display:flex; align-items:center; gap:4px;">
                                                                             <div
-                                                                                style="background-color: {{ course_form.color_5 }}; border: 1px solid black; border-radius: 8px; width: 15px; height: 15px;">
+                                                                              style="
+                                                                                background-color: {{ bg }};
+                                                                                border: 1px solid black;
+                                                                                border-radius: 8px;
+                                                                                width: 15px; height: 15px;
+                                                                              ">
                                                                             </div>
-                                                                            <span>{{ question.option_5 }}</span>
-                                                                        </div>
-                                                                        {% endif %}
+                                                                            <span>{{ label }}</span>
+                                                                          </div>
+                                                                        {% endwith %}
                                                                     </li>
                                                                     {% endif %}
                                                                     {% endfor %}
@@ -198,7 +215,7 @@
                         No teams have been created yet.
                     </div>
                     {% endif %}
-                    {% endif %}
+
                     </div>
                     {% if form_expired %}
                         <div class="position-relative mt-5 mb-4 page-navigation-full" style="min-height: 50px;">
