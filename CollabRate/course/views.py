@@ -109,9 +109,15 @@ def create_team(request, join_code):
             messages.error(request, "Team name is required.")
             return render(request, "course/create_team.html", {
                 "course": course,
-                "students": available_students,
+                "students": available_students
             })
-        
+
+        if not selected_ids:
+            messages.error(request, "At least one team member is required.")
+            return render(request, "course/create_team.html", {
+                "course": course,
+                "students": available_students
+            })
         # Create new team
         team = Team.objects.create(name=team_name, course=course)
         team.students.set(
