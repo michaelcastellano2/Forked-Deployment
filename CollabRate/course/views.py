@@ -441,7 +441,8 @@ def draft_questions(request, join_code, course_form_id):
                     [student.email],
                 )
             messages.success(request, f"Form '{course_form.name}' published and notifications sent.")
-            return redirect('create_form', join_code=join_code)
+            # return redirect('create_form', join_code=join_code)
+            return redirect('view_form_responses', join_code=join_code, course_form_id=course_form.pk)
         
         # elif action == 'release':
         #     course_form.state = 'released'

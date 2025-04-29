@@ -37,3 +37,7 @@ def dict_get(d, key):
         return d.get(key)
     except Exception:
         return None
+
+@register.filter
+def for_member(responses, member):
+    return responses.filter(evaluee=member)
