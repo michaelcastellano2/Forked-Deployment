@@ -435,7 +435,7 @@ def draft_questions(request, join_code, course_form_id):
                     [student.email],
                 )
             messages.success(request, f"Form '{course_form.name}' published and notifications sent.")
-            return redirect('course_detail', join_code=join_code)
+            return redirect('create_form', join_code=join_code)
         
         # elif action == 'release':
         #     course_form.state = 'released'
@@ -877,7 +877,7 @@ def answer_form(request, join_code, form_id):
     return render(request, "course/answer_form.html", context)
 
 @login_required
-def update_open_ended_response(request, join_code, form_id, response_id):
+def update_open_ended_response(request, join_code, course_form_id, response_id):
     if request.method == 'POST':
         new_answer = request.POST.get('answer')
 
@@ -889,12 +889,13 @@ def update_open_ended_response(request, join_code, form_id, response_id):
         response.save()
 
         # Return a JsonResponse instead of redirecting
-        return JsonResponse({
-            'success': True,
-            'message': 'Response updated successfully!',
-            'updated_answer': new_answer,  # Optionally include the updated answer in the response
-            'response_id': response_id,
-        })
+        # return JsonResponse({
+        #     'success': True,
+        #     'message': 'Response updated successfully!',
+        #     'updated_answer': new_answer,  # Optionally include the updated answer in the response
+        #     'response_id': response_id,
+        # })
+        return redirect('view_form_responses', join_code=join_code, course_form_id=course_form_id)
     
     # If the request is not POST, return an error
     return JsonResponse({

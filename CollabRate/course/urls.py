@@ -20,7 +20,7 @@ urlpatterns = [
 
     path('<str:join_code>/', views.course_detail, name='course_detail'),
 
-    path('<str:join_code>/form/edit/<int:form_id>/update_response/<int:response_id>/', views.update_open_ended_response, name='update_open_ended_response'),
+    path('<str:join_code>/form/edit/<int:course_form_id>/update_response/<int:response_id>/', views.update_open_ended_response, name='update_open_ended_response'),
 
     #debug paths
     path('course/<str:join_code>/clear/', views.clear_course_forms, name='clear_course_forms'),
