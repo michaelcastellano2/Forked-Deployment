@@ -61,7 +61,7 @@
                                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                                     data-bs-target="#collapseMember{{ member.id }}" aria-expanded="false"
                                                     aria-controls="collapseMember{{ member.id }}">
-                                                    {{ member.username }}'s Feedback
+                                                    {{ member.username|capfirst }}'s Feedback
                                                 </button>
                                             </h2>
                                             <div id="collapseMember{{ member.id }}" class="accordion-collapse collapse"
@@ -88,7 +88,7 @@
                                                                         {% if response.evaluator == member %}
                                                                         <div>Self-evaluation:</div>
                                                                         {% else %}
-                                                                        <div>Response by {{ response.evaluator.username }}:
+                                                                        <div>Response by {{ response.evaluator.username|capfirst }}:
                                                                         </div>
                                                                         {% endif %}
 
@@ -180,10 +180,12 @@
                                                                     method="post"
                                                                     action="{% url 'update_open_ended_response' course_form.course.join_code course_form.id response.id %}">
                                                                     {% csrf_token %}
-                                                                    <p>Response by {{ response.evaluator.username }}:</p>
+                                                                    <p>Response by {{ response.evaluator.username|capfirst }}:</p>
                                                                     <textarea name="answer" rows="2"
                                                                         cols="25">{{ response.answer }}</textarea>
-                                                                    <button type="submit">Save</button>
+                                                                    {% if course_form.state != 'released' %}
+                                                                        <button type="submit">Save</button>
+                                                                    {% endif %}
                                                                 </form>
                                                                 <div class="response-message" style="color: green; display: none;"></div>
                                                                 <!-- Success message -->
@@ -224,6 +226,7 @@
                             </div>
                         
                             <!-- Right-aligned Release Icon -->
+                            {% if course_form.state != 'released' %}
                             <div class="d-flex align-items-center justify-content-end gap-4" style="height: 100%;">
                                 <form method="POST" style="padding-right: 5%;">
                                     {% csrf_token %}
@@ -232,6 +235,7 @@
                                     </button>
                                 </form>
                             </div>
+                            {% endif %}
                         </div>
                     {% else %}
                         <div class="d-flex justify-content-center align-items-center mt-5 mb-4 page-navigation">

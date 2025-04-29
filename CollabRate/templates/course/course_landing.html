@@ -24,7 +24,7 @@
         </div>
         <div class="w-70 p-4 me-5 custom-scroll" style="overflow-y: auto; max-height: 75vh; margin-top: 2.5vh;">
             {% for grp in team_forms %}
-            <h2 class="section-title">Team: {{ grp.team.name }}</h2>
+            <h2 class="section-title">Team: {{ grp.team.name|capfirst }}</h2>
 
             <h3>To Do</h3>
             {% if grp.todo_forms %}
@@ -33,7 +33,7 @@
                 style="text-decoration:none; color:inherit;">
                 <div class="card">
                     <div class="info">
-                        <p>{{ form.name }} | {{ grp.team.name }}</p>
+                        <p>{{ form.name|capfirst }} | {{ grp.team.name|capfirst }}</p>
                         <small
                             class="card-text due-datetime"
                             data-due-datetime="{{ form.due_datetime|date:'c' }}"
@@ -46,7 +46,7 @@
             </a>
             {% endfor %}
             {% else %}
-            <p>No forms assigned to {{ grp.team.name }}.</p>
+            <p>No forms assigned to {{ grp.team.name|capfirst }}.</p>
             {% endif %}
 
             <h3>Feedback</h3>
@@ -56,14 +56,14 @@
                 class="text-decoration-none text-reset">
                 <div class="card">
                     <div class="info">
-                        <p>{{ form.name }} | {{ grp.team.name }}</p>
+                        <p>{{ form.name|capfirst }} | {{ grp.team.name|capfirst }}</p>
                     </div>
                     <span class="dot green"></span>
                 </div>
             </a>
             {% endfor %}
             {% else %}
-            <p>No feedback released for {{ grp.team.name }} yet.</p>
+            <p>No feedback released for {{ grp.team.name|capfirst }} yet.</p>
             {% endif %}
 
             {% endfor %}
@@ -78,18 +78,36 @@
     </div>
     {% endif %}
     {% else %}
-    <!-- Professor view - unchanged from original -->
-    <div class="main-container">
-        <h1>Hello professor!</h1>
-        <button><a href="{% url 'create_team' course.join_code %}">Create/Manage Teams</a></button>
-        <button><a href="{% url 'create_form' course.join_code %}">Create Form</a></button>
-        <form method="POST" action="{% url 'clear_course_forms' course.join_code %}">
-            {% csrf_token %}
-            <button type="submit">Clear ALL Course Forms/Questions (TESTING PURPOSES)</button>
-        </form>
-
+    <div class="main-container p-4">
+        <details class="jump-back-card shadow" open>
+          <summary class="jump-back-summary">
+            <div class="d-flex align-items-center">
+              <i class="fa-solid fa-file-lines fa-lg me-2"></i>
+              <div>
+                {{ latest_form.name|capfirst }}<br>
+                <small
+                    class="card-text due-datetime"
+                    data-due-datetime="{{ form.due_datetime|date:'c' }}"
+                >
+                    <!-- will be filled in by JS -->
+                </small>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-down expand-icon"></i>
+          </summary>
+    
+          <div class="jump-back-details">
+            <p>Self Evaluate: {{ latest_form.self_evaluate|yesno:"Yes,No" }}</p>
+            <p>Likert Questions: {{ latest_form.num_likert }}</p>
+            <p>Open Ended Questions: {{ latest_form.num_open_ended }}</p>
+            <p>Created at: {{ latest_form.created_at|date:"m/d/Y g:i A" }}</p>
+            <p>Status: {{ latest_form.get_state_display }}</p>
+          </div>
+        </details>
     </div>
     {% endif %}
+
+
 </div>
 {% endblock %}
 

@@ -40,9 +40,21 @@ def course_detail(request, join_code):
             'released_forms': released,
         })
 
+    latest_form = course.course_forms.order_by('-created_at').first()
+
+    hour = now.hour
+    if hour < 12:
+        greeting = "Good morning"
+    elif hour < 18:
+        greeting = "Good afternoon"
+    else:
+        greeting = "Good evening"
+
     return render(request, 'course/course_landing.html', {
         'course':     course,
         'team_forms': team_forms,
+        'latest_form': latest_form,
+        'greeting': greeting,
     })
 
 @login_required
@@ -837,6 +849,16 @@ def answer_form(request, join_code, form_id):
             selected_evaluee_id = int(selected_evaluee_id)
         except CustomUser.DoesNotExist:
             selected_evaluee_id = None
+    
+    colors = [
+      form_obj.color_1,
+      form_obj.color_2,
+      form_obj.color_3,
+      form_obj.color_4,
+      form_obj.color_5,
+    ]
+    scale = [1, 2, 3, 4, 5]
+    likert_choices = list(zip(scale, colors))
 
     # 4) Consolidated context
     context = {
@@ -844,7 +866,7 @@ def answer_form(request, join_code, form_id):
         "form_obj":             form_obj,
         "likert_questions":     likert_questions,
         "open_questions":       open_questions,
-        "likert_scale_values":  [1, 2, 3, 4, 5],
+        "likert_choices":       likert_choices,
         "potential_peers":      list(potential_peers),
         "selected_evaluee_id":  selected_evaluee_id,
         "existing_likert":      existing_likert,
