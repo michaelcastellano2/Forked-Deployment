@@ -1,48 +1,44 @@
 {% extends 'collabrate/base.html' %}
+{% block title %}Peer Results{% endblock %}
 {% load static %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'dashboard/peer_results.css' %}">
-<link rel="stylesheet" href="{% static 'course/sidenav.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="d-flex">
     {% include "course/sidenav.html" %}
+    <div class="main-container p-4">
 
-    <div class="container">
-        <!-- Header Box -->
-        <div class="header-box mb-4 d-flex align-items-center">
-            <span class="course-code fw-bold">{{ course.code }}</span>
-            <span class="separator">|</span>
-            <span class="course-title">{{ course.title }}</span>
-            <span class="separator">|</span>
-            <span class="delivery fw-bold">{{ form.name }}</span>
-        </div>
-        
+        <div class="course-header" style="background-color: {{ course.color|default:'#4CAF50' }};"
 
-        <!-- Main Heading -->
-        <h1 class="title text-center">Your Peer Assessment Results Are Here!</h1>
-
-        <!-- Score -->
-        <div class="score text-center">
-            Your Peer Assessment Score: <span><strong>{{ score }}/10</strong></span>
+            <b>{{ course.code }}</b> | {{ course.title }} | {{ course_form.name }}
         </div>
 
-        <!-- Feedback Section -->
-        <h2 class="feedback-heading text-center">Qualitative Peer Feedback:</h2>
+        <h1 class="mt-4">Your Peer Assessment Results</h1>
 
-        {% if feedback_list %}
-        <div class="feedback-scroll mx-auto">
-        "
-            {% for item in feedback_list %}
-                {{ item }}.
+        <h2 class="mt-4">Overall Average Score</h2>
+        <p><strong>{{ score }}/5</strong></p>
+
+        <h2 class="mt-4">Likert Question Averages</h2>
+        <ul>
+            {% for question, avg_score in likert_averages.items %}
+                <li><strong>{{ question }}</strong>: {{ avg_score }}</li>
+            {% empty %}
+                <li>No Likert responses yet.</li>
             {% endfor %}
-            "
+        </ul>
+
+        <h2 class="mt-4">Peer Feedback</h2>
+        <div class="feedback-box">
+            {% for comment in feedback %}
+                <p>"{{ comment }}"</p>
+            {% empty %}
+                <p>No feedback available yet.</p>
+            {% endfor %}
         </div>
-        {% else %}
-        <p class="no-feedback text-center">No feedback available yet.</p>
-        {% endif %}
-    </div>  
+
+    </div>
 </div>
-{% endblock %}
+{% endblock %} 

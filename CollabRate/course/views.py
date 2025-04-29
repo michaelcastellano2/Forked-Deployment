@@ -14,6 +14,7 @@ from django.utils import timezone
 from datetime import datetime, time
 from django.http import JsonResponse
 from django.db.models import BooleanField, Case, Value, When
+from django.db.models import Avg
 
 @login_required
 def course_detail(request, join_code):
@@ -880,13 +881,53 @@ def update_open_ended_response(request, join_code, form_id, response_id):
     })
 
 @login_required
+
+
+@login_required
 def peer_results(request, join_code, form_id):
     course = get_object_or_404(Course, join_code=join_code)
     course_form = get_object_or_404(CourseForm, id=form_id, course=course)
-    
+
+    # Get Likert and OpenEnded questions
+    likert_questions = course_form.likert_questions.all()
+    open_ended_questions = course_form.open_ended_questions.all()
+
+    # Get all Likert responses where this user was evaluated
+    likert_responses = LikertResponse.objects.filter(
+        likert__course_form=course_form,
+        evaluee=request.user
+    )
+
+    # Calculate average per Likert question
+    likert_averages = {}
+    for likert in likert_questions:
+        responses = likert_responses.filter(likert=likert)
+        avg_score = responses.aggregate(avg=Avg('answer'))['avg']
+        if avg_score is not None:
+            likert_averages[likert.question] = round(avg_score, 2)
+        else:
+            likert_averages[likert.question] = "No responses yet"
+
+    # Overall average
+    overall_score = likert_responses.aggregate(avg=Avg('answer'))['avg']
+    if overall_score is not None:
+        overall_score = round(overall_score, 2)
+
+    # Get open-ended responses
+    open_ended_responses = OpenEndedResponse.objects.filter(
+        open_ended__course_form=course_form,
+        evaluee=request.user
+    ).values_list('answer', flat=True)
+
+    # Sort open-ended responses alphabetically
+    feedback_list = sorted(open_ended_responses)
+
     context = {
         'course': course,
         'course_form': course_form,
+        'likert_averages': likert_averages,
+        'score': overall_score,
+        'feedback': feedback_list,
     }
-    
-    return render(request, 'course/results.html', context)
+
+    return render(request, 'dashboard/peer_results.html', context)
