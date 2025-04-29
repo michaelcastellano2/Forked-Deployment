@@ -14,12 +14,12 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding-top: 0rem;  /* reduce or remove */
+    padding-top: 0rem;
 }
 
 /* Orange Header Box */
 .header-box {
-    background-color: #EA6A5D; /* exact shade from screenshot */
+    background-color: #EA6A5D;
     color: #212121;
     padding: 1.75rem 2.5rem;
     border-radius: 18px;
@@ -29,34 +29,13 @@
     display: flex;
     align-items: center;
     gap: 1.25rem;
-    width: 100% + 40 px;
+    width: calc(100% + 40px);
     margin-top: -1.5rem;
     margin-bottom: 2.5rem;
-    margin-left: -2rem; /* shift box to the left slightly */
+    margin-left: -2rem;
 }
 
-
-
-
-/* Text styles inside the header */
-.header-box .course-code {
-    font-weight: 700;
-}
-
-.header-box .course-title {
-    font-weight: 400;
-}
-
-.header-box .delivery {
-    font-weight: 700;
-}
-
-.header-box .separator {
-    font-weight: 400;
-}
-
-/* Page title */
-.title,
+/* Page Title */
 .main-heading {
     font-size: 2.5rem;
     font-weight: 800;
@@ -70,18 +49,57 @@
     font-size: 1.25rem;
     margin-bottom: 2rem;
 }
-.score span,
-.score strong {
+.score span {
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 2rem;
 }
+
+/* Likert section */
+.likert-question {
+    margin-bottom: 2rem;
+    width: 100%;
+}
+.question-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.likert-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.likert-average {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Progress Bar Container */
+.progress-bar {
+    flex-grow: 1;
+    height: 20px;
+    background-color: #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+}
+
+/* Progress Bar Segments */
+.progress-segment {
+    height: 100%;
+}
+.rating-1 { background-color: #e53935; } /* Strongly Disagree */
+.rating-2 { background-color: #fb8c00; } /* Disagree */
+.rating-3 { background-color: #fdd835; } /* Neutral */
+.rating-4 { background-color: #43a047; } /* Agree */
+.rating-5 { background-color: #1e88e5; } /* Strongly Agree */
 
 /* Feedback heading */
 .feedback-heading {
     text-align: center;
     font-size: 1.6rem;
     font-weight: 700;
-    margin-bottom: 1rem;
+    margin: 2rem 0 1rem;
 }
 
 /* Feedback scrollable box */
