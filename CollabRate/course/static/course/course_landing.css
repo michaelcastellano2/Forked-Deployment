@@ -75,3 +75,54 @@ body {
 .dot.green {
     background-color: #62c06f;
 }
+
+/* Container card */
+.jump-back-card {
+    border-radius: 8px;
+    padding: 1rem;
+    width: 100%;
+    max-width: 600px; /* optional */
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Style the summary bar */
+  .jump-back-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;      /* remove default marker */
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Hide the native twisty marker */
+  .jump-back-summary::-webkit-details-marker {
+    display: none;
+  }
+  
+  /* The little chevron on the right */
+  .expand-icon {
+    transition: transform 0.2s ease;
+  }
+  
+  /* Rotate the chevron when open */
+  .jump-back-card[open] .expand-icon {
+    transform: rotate(180deg);
+  }
+  
+  /* The expanded details area */
+  .jump-back-details {
+    margin-top: 1rem;
+    padding-left: 1.5rem;  /* indent, optional */
+    border-left: 2px solid rgba(0,0,0,0.2);
+  }
+  
+  /* Tidy up the text */
+  .jump-back-details p {
+    margin: 0.5rem 0;
+  }
+
+  .jump-back-summary .fa-file-lines {
+    font-size: 2.5rem;  /* pick whatever size you like */
+  }
