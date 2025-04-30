@@ -50,6 +50,62 @@
     background-color: #c82333; 
     color: white;
   }
+  /* 1) When collapsed: full rounding on all corners */
+  .accordion-button.collapsed {
+    border-radius: 0.375rem !important;
+  }
+
+  /* 2) When expanded: only top corners rounded */
+  .accordion-button:not(.collapsed) {
+    border-top-left-radius:    0.375rem !important;
+    border-top-right-radius:   0           !important;
+    border-bottom-left-radius: 0           !important;
+    border-bottom-right-radius:0           !important;
+    box-shadow: none !important;
+  }
+  /* Accordion background and text color */
+
+  .accordion-button:not(.collapsed) {
+    background-color: #8ed2a9 !important;
+    color: black !important;
+    border: none !important;
+  }
+
+  /* Remove the little divider line (optional) */
+  /* .accordion-item {
+    border: none !important;
+  } */
+
+  /* Remove focus outline / box-shadow on click or keyboard focus */
+  .accordion-button:focus {
+    box-shadow: none !important;
+    outline: none !important;
+    border-color: transparent !important;
+  }
+  button.accordion-button[data-bs-target="#createTeamForm"] {
+  background-color: white !important;
+  color: black !important;
+  }
+  /* square “plus” toggle button */
+  .square-create-btn {
+    width: 3.25rem;
+    height: 3.25rem;
+    background-color: #8ed2a9;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 0.25rem;
+    font-size: 1.25rem;          /* size of the icon */
+  }
+  .square-create-btn:hover {
+    background-color: #7dc29a;
+  }
+  .square-create-btn:focus {
+    outline: none;
+    box-shadow: none;
+  }
 </style>
 {% endblock %}
 
@@ -70,44 +126,57 @@
             </div>
             {% endfor %}
       {% endif %}
-      {% if messages %}
+      <!-- {% if messages %}
         {% for message in messages %}
           <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-0 notif" role="alert">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         {% endfor %}
-      {% endif %}
+      {% endif %} -->
         <!-- header -->
-        <div class="d-flex justify-content-between align-items-center p-3 mb-3" style="background-color:white; border-radius: 0.25rem;">
-            <h2 class="mb-0" style="color:black">{{ course.code }} | {{ course.title }}</h2>
-            <!-- Button that toggles collapsible form-->
-            <button class="btn btn-dark" data-bs-toggle="collapse" data-bs-target="#createTeamForm">
-                + Create New Group
-            </button>
+        <div style="flex: 0 0 8.5%;">
+          <div class="pb-3 d-flex justify-content-between align-items-center">
+              <h1>
+                  {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> Manage Groups
+              </h1>
+              <button
+                class="square-create-btn"
+                data-bs-toggle="collapse"
+                data-bs-target="#createTeamForm"
+                aria-expanded="false"
+                aria-controls="createTeamForm"
+                title="Create New Group"
+              >
+                <i class="fas fa-plus"></i>
+              </button>
+          </div>
+          <hr class="m-0 pb-5" style="opacity: 100%;">
         </div>
-
      
         <!-- Collapsible form for creating new team -->
-        <div class="collapse mb-4 w-100" id="createTeamForm">
+        <div class="collapse mb-5 w-100" id="createTeamForm">
           <div class="accordion-item w-100">
             <div class="d-flex align-stretch">
               <h2 class="accordion-header flex-grow-1">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#createTeamForm" aria-expanded="true" aria-controls="createTeamForm">
-                  <span class="fw-bold fs-4">New Team</span>
+                  <div class="d-flex align-items-center mb-4 ps-1">
+                    <i class="fa-solid fa-exclamation-circle me-2"></i>
+                    <label for="evaluee_id"><p class="mb-0">Enter Team Details Below</p></label>
+                  </div> 
                 </button>
               </h2>
             </div>
             <div class="accordion-collapse collapse show">
               <div class="accordion-body">
-                {% if messages %}
+                <!-- {% if messages %}
                   {% for message in messages %}
                     <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
                       {{ message }}
                       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                   {% endfor %}
-                {% endif %}
+                {% endif %} -->
                 <form method="POST">
                   {% csrf_token %}
                   <div class="mb-3">
@@ -122,7 +191,7 @@
                       {% endfor %}
                     </select>
                   </div>
-                  <button type="submit" class="btn btn-primary">Create Team</button>
+                  <button type="submit" class="btn" style="background-color: #8ed2a9; color: black;">+ Create Team</button>
                 </form>
               </div>
             </div>
@@ -168,7 +237,7 @@
             
             <div class="accordion" id="teamsAccordion">
                 {% for team in course.teams.all %}
-                  <div class="accordion-item mb-2">
+                  <div class="accordion-item mb-4 shadow">
                     <div class="d-flex align-stretch">
                       <!-- 1) the accordion toggle -->
                       <h2 class="accordion-header flex-grow-1" id="heading{{ team.id }}">
