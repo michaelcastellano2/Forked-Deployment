@@ -9,9 +9,10 @@
 <style>
   .barchart-container {
     display: flex;
-    height: 1rem;
+    height: 3rem;
     border: 1px solid #ddd;
     overflow: hidden;
+    border-radius: 7.5px;
   }
   .barchart-segment {
     height: 100%;
@@ -24,9 +25,14 @@
     {% include "course/sidenav.html" %}
     <div class="main-container p-4">
 
-        <div class="course-header" style="background-color: {{ course.color|default:'#4CAF50' }};"
-
-            <b>{{ course.code }}</b> | {{ course.title }} | {{ course_form.name }}
+          <!-- Header Section -->
+          <div style="flex: 0 0 8.5%;">
+            <div class="pb-3">
+                <h1>
+                    {{ course.code }} <strong>|</strong> {{ course.title }} <strong>|</strong> Review Feedback
+                </h1>
+            </div>
+            <hr class="m-0" style="opacity: 100%;">
         </div>
 
         <h1 class="mt-4">Your Peer Assessment Results</h1>
@@ -44,7 +50,7 @@
                 Avg: {{ item.avg }} / 5
               </div>
               <!-- Flex-bar showing distribution -->
-              <div class="flex-grow-1 barchart-container">
+              <div class="flex-grow-1 barchart-container shadow">
                 {% for bar in item.bars %}
                   <div
                     class="barchart-segment"

@@ -948,7 +948,7 @@ def peer_results(request, join_code, form_id):
         for i in range(1, 6):
             cnt = qs.filter(answer=i).count()
             pct = (cnt / total) * 100
-            color = getattr(CourseForm, f'color_{i}')
+            color = getattr(course_form, f'color_{i}')
             bars.append({
                 "width": f"{pct:.1f}%",
                 "color": color
