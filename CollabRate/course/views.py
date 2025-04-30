@@ -15,6 +15,7 @@ from datetime import datetime, time
 from django.http import JsonResponse
 from django.db.models import BooleanField, Case, Value, When
 from django.db.models import Avg
+import json
 
 @login_required
 def course_detail(request, join_code):
@@ -938,6 +939,14 @@ def peer_results(request, join_code, form_id):
         else:
             likert_averages[likert.question] = "No responses yet"
 
+    # Calculates the likert distributions for each likert question
+    likert_distributions = []
+    for likert in likert_questions:
+        questions = likert_responses.filter(likert=likert)
+        counts = [questions.filter(answer=i).count() for i in range(1, 6)]
+        likert_distributions.append({"question": likert.question,"counts": counts})
+    
+
     # Overall average
     overall_score = likert_responses.aggregate(avg=Avg('answer'))['avg']
     if overall_score is not None:
@@ -958,6 +967,7 @@ def peer_results(request, join_code, form_id):
         'likert_averages': likert_averages,
         'score': overall_score,
         'feedback': feedback_list,
+        'likert_distributions_json': json.dumps(likert_distributions),
     }
 
-    return render(request, 'dashboard/peer_results.html', context)
+    return render(request, 'course/peer_results.html', context)
