@@ -939,35 +939,43 @@ def peer_results(request, join_code, form_id):
         else:
             likert_averages[likert.question] = "No responses yet"
 
-    # Calculates the likert distributions for each likert question
-    likert_distributions = []
+    barchart_data = []
     for likert in likert_questions:
-        questions = likert_responses.filter(likert=likert)
-        counts = [questions.filter(answer=i).count() for i in range(1, 6)]
-        likert_distributions.append({"question": likert.question,"counts": counts})
-    
+        qs = LikertResponse.objects.filter(evaluee=request.user, likert=likert)
+        total = qs.count() or 1  # avoid div by zero
 
-    # Overall average
+        bars = []
+        for i in range(1, 6):
+            cnt = qs.filter(answer=i).count()
+            pct = (cnt / total) * 100
+            color = getattr(CourseForm, f'color_{i}')
+            bars.append({
+                "width": f"{pct:.1f}%",
+                "color": color
+            })
+        barchart_data.append({
+            "question": likert.question,
+            "avg": likert_averages.get(likert.question),
+            "bars": bars
+        })
+
     overall_score = likert_responses.aggregate(avg=Avg('answer'))['avg']
     if overall_score is not None:
         overall_score = round(overall_score, 2)
 
-    # Get open-ended responses
     open_ended_responses = OpenEndedResponse.objects.filter(
         open_ended__course_form=course_form,
         evaluee=request.user
     ).values_list('answer', flat=True)
 
-    # Sort open-ended responses alphabetically
     feedback_list = sorted(open_ended_responses)
-
     context = {
         'course': course,
         'course_form': course_form,
         'likert_averages': likert_averages,
         'score': overall_score,
         'feedback': feedback_list,
-        'likert_distributions_json': json.dumps(likert_distributions),
+        'barchart_data': barchart_data,
     }
 
     return render(request, 'course/peer_results.html', context)
