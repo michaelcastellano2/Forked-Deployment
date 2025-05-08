@@ -18,12 +18,12 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialize environment variables
-'''
+
 env = environ.Env(
     DEBUG=(bool, False)
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-'''
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -32,9 +32,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = 'django-insecure-%h4fu_r#-s0x4+-a%3sy@1fui&n(!uv^bhs(zv764wdf=vrps5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['forked-deployment-production.up.railway.app']
+ALLOWED_HOSTS = []
 
 
 # Application definition
