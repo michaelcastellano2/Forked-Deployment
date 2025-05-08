@@ -78,7 +78,7 @@ def create_course(request):
         
         course = Course(code=code, title=title, semester=semester, year=int(year), color=color, professor=request.user)
         course.save()
-
+        '''
         raw_emails = request.POST.get('invite_email', '[]')
         try:
             emails = json.loads(raw_emails)
@@ -105,6 +105,7 @@ def create_course(request):
             from_email = settings.DEFAULT_FROM_EMAIL
             recipient_list = [email]
             send_mail(subject, message, from_email, recipient_list)
+            '''
         messages.success(request, f"Course {course.title} created. Join Code: {course.join_code}")
     return redirect('dashboard')
 
@@ -143,9 +144,11 @@ def course_invite(request, join_code, token):
         return redirect('dashboard')
     
     course = get_object_or_404(Course, join_code=join_code)
+    '''
     if request.user.email.lower() != invited_email.lower():
         messages.error(request, "The invitation link is intended for a different account. Please sign in with the correct email.")
         return redirect('dashboard')
+    '''
     if course.students.filter(pk=request.user.pk).exists():
         messages.info(request, f"Already enrolled in {course.title}")
     else:

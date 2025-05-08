@@ -425,7 +425,7 @@ def draft_questions(request, join_code, course_form_id):
                 # 2) Format as “Apr 30 at 03:20 PM”
                 due_date_str = local_dt.strftime('%b %d')
                 due_time_str = local_dt.strftime('%I:%M %p')
-
+                '''
                 subject = f"New Form Published: '{course_form.name}' in {course_form.course.code}"
                 message = (
                     f"Hello,\n\n"
@@ -444,7 +444,7 @@ def draft_questions(request, join_code, course_form_id):
             messages.success(request, f"Form '{course_form.name}' published and notifications sent.")
             # return redirect('create_form', join_code=join_code)
             return redirect('view_form_responses', join_code=join_code, course_form_id=course_form.pk)
-        
+            '''
         # elif action == 'release':
         #     course_form.state = 'released'
         #     course_form.save()
@@ -634,6 +634,7 @@ def edit_form(request, join_code, form_id):
         students = CustomUser.objects.filter(teams__course_forms=form).distinct()
         if form.state == 'published':
             for student in students:
+                '''
                 subject = f"Update: '{form.name}' in {course.code}"
                 message = (
                     f"Hello,\n\n"
@@ -646,6 +647,7 @@ def edit_form(request, join_code, form_id):
                 recipient_list = [student.email]
                 send_mail(subject, message, from_email, recipient_list)
     
+                '''
         messages.success(request, f"Form '{form.name}' has been updated successfully.")
         return redirect('view_forms', join_code=join_code)
     
